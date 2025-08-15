@@ -58,7 +58,7 @@ export const AppDataSource = new DataSource({
     Emprestimo,
     PedidoCompra
   ],
-  migrations: ['./migrations/*.ts'],
+  migrations: ['./src/database/migrations/*.ts'],
   migrationsTableName: 'migrations',
   migrationsRun: false,
 });
