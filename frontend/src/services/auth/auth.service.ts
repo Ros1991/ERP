@@ -1,19 +1,14 @@
 import api from '../../lib/axios';
 import { API_CONFIG } from '../../config/api.config';
-import type {
-  LoginCredentials,
-  RegisterCredentials,
-  UpdateUserCredentials,
-} from '../../models/auth/User.model';
-import type { AuthResponse } from '../../models/auth/AuthResponse.model';
+import type { LoginDTO, RegisterDTO, ForgotPasswordDTO, ResetPasswordDTO, UpdateUserDTO, AuthResponse } from '../../models/auth';
 
 class AuthService {
-  async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>(
+  async login(credentials: LoginDTO): Promise<AuthResponse> {
+    const response = await api.post<{success: boolean, message: string, data: AuthResponse}>(
       API_CONFIG.endpoints.auth.login, 
       credentials
     );
-    return response.data;
+    return response.data.data;
   }
 
   async register(credentials: RegisterCredentials): Promise<AuthResponse> {

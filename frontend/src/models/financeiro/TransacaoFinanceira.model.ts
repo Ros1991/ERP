@@ -1,20 +1,15 @@
 export interface TransacaoFinanceira {
-  id: number;
+  transacaoFinanceiraId: number;
   empresaId: number;
   contaId: number;
-  tipo: 'RECEITA' | 'DESPESA';
-  categoria: string;
-  valor: number;
-  dataVencimento: string;
-  dataPagamento?: string;
-  descricao: string;
-  observacoes?: string;
   terceiroId?: number;
-  numeroDocumento?: string;
-  formaPagamento?: 'DINHEIRO' | 'PIX' | 'BOLETO' | 'CARTAO_CREDITO' | 'CARTAO_DEBITO' | 'TRANSFERENCIA';
-  status: 'PENDENTE' | 'PAGO' | 'CANCELADO';
-  isRecorrente: boolean;
-  recorrenciaTipo?: 'MENSAL' | 'TRIMESTRAL' | 'SEMESTRAL' | 'ANUAL';
+  tipo: 'RECEITA' | 'DESPESA';
+  descricao: string;
+  valor: number;
+  data: string;
+  observacao?: string;
+  isDeleted: boolean;
+  deletedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -22,20 +17,12 @@ export interface TransacaoFinanceira {
 export interface CreateTransacaoFinanceiraDTO {
   empresaId: number;
   contaId: number;
-  tipo: 'RECEITA' | 'DESPESA';
-  categoria: string;
-  valor: number;
-  dataVencimento: string;
-  descricao: string;
-  observacoes?: string;
   terceiroId?: number;
-  numeroDocumento?: string;
-  formaPagamento?: 'DINHEIRO' | 'PIX' | 'BOLETO' | 'CARTAO_CREDITO' | 'CARTAO_DEBITO' | 'TRANSFERENCIA';
-  isRecorrente?: boolean;
-  recorrenciaTipo?: 'MENSAL' | 'TRIMESTRAL' | 'SEMESTRAL' | 'ANUAL';
+  tipo: 'RECEITA' | 'DESPESA';
+  descricao: string;
+  valor: number;
+  data: string;
+  observacao?: string;
 }
 
-export interface UpdateTransacaoFinanceiraDTO extends Partial<CreateTransacaoFinanceiraDTO> {
-  dataPagamento?: string;
-  status?: 'PENDENTE' | 'PAGO' | 'CANCELADO';
-}
+export interface UpdateTransacaoFinanceiraDTO extends Partial<CreateTransacaoFinanceiraDTO> {}

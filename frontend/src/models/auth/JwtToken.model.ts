@@ -7,15 +7,6 @@ export interface JwtToken {
   updatedAt: string;
 }
 
-export interface AuthResponse {
-  user: {
-    id: number;
-    email: string;
-    nome: string;
-  };
-  token: string;
-  expiresAt: string;
-}
 
 export interface TokenPayload {
   userId: number;

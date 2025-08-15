@@ -1,25 +1,20 @@
 export interface CentroCusto {
-  id: number;
+  centroCustoId: number;
   empresaId: number;
-  codigo: string;
   nome: string;
   descricao?: string;
-  tipo: 'OPERACIONAL' | 'ADMINISTRATIVO' | 'COMERCIAL' | 'INVESTIMENTO';
-  centroCustoPaiId?: number;
-  isActive: boolean;
+  ativo: boolean;
+  isDeleted: boolean;
+  deletedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateCentroCustoDTO {
   empresaId: number;
-  codigo: string;
   nome: string;
   descricao?: string;
-  tipo: 'OPERACIONAL' | 'ADMINISTRATIVO' | 'COMERCIAL' | 'INVESTIMENTO';
-  centroCustoPaiId?: number;
+  ativo?: boolean;
 }
 
-export interface UpdateCentroCustoDTO extends Partial<CreateCentroCustoDTO> {
-  isActive?: boolean;
-}
+export interface UpdateCentroCustoDTO extends Partial<CreateCentroCustoDTO> {}

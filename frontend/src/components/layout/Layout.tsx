@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Outlet, Link, useLocation } from 'react-router-dom';
+import { useNavigate, Outlet, Link, useLocation, useParams } from 'react-router-dom';
 import { 
   Building2, 
   Users, 
@@ -11,31 +11,161 @@ import {
   LogOut,
   Settings,
   ChevronDown,
-  Home
+  Home,
+  ChevronRight,
+  UserCheck,
+  FileText,
+  CheckSquare,
+  Wallet,
+  UserCog,
+  TrendingUp,
+  Package
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/auth.store';
 import { Button } from '../ui/Button';
 import { cn } from '../../utils/cn';
 
-const menuItems = [
+interface MenuItem {
+  icon: any;
+  label: string;
+  path?: string;
+  children?: MenuItem[];
+}
+
+const menuItems: MenuItem[] = [
   { icon: Home, label: 'Dashboard', path: '/dashboard' },
   { icon: Building2, label: 'Empresas', path: '/empresas' },
-  { icon: Users, label: 'Funcionários', path: '/funcionarios' },
-  { icon: ClipboardList, label: 'Tarefas', path: '/tarefas' },
-  { icon: DollarSign, label: 'Financeiro', path: '/financeiro' },
-  { icon: ShoppingCart, label: 'Compras', path: '/compras' },
+  { 
+    icon: Users, 
+    label: 'Funcionários',
+    children: [
+      { icon: Users, label: 'Funcionários', path: '/funcionarios' },
+      { icon: FileText, label: 'Contratos', path: '/funcionario-contratos' },
+      { icon: Wallet, label: 'Benefícios/Descontos', path: '/funcionario-beneficios' },
+    ]
+  },
+  { 
+    icon: ClipboardList, 
+    label: 'Tarefas',
+    children: [
+      { icon: ClipboardList, label: 'Tarefas', path: '/tarefas' },
+      { icon: CheckSquare, label: 'Tipos de Tarefa', path: '/tarefa-tipos' },
+      { icon: UserCheck, label: 'Status de Tarefas', path: '/tarefa-status' },
+    ]
+  },
+  { 
+    icon: DollarSign, 
+    label: 'Financeiro',
+    children: [
+      { icon: Wallet, label: 'Contas', path: '/contas' },
+      { icon: UserCog, label: 'Terceiros', path: '/terceiros' },
+      { icon: TrendingUp, label: 'Transações', path: '/transacoes-financeiras' },
+      { icon: Building2, label: 'Centros de Custo', path: '/centros-custo' },
+    ]
+  },
+  { 
+    icon: ShoppingCart, 
+    label: 'Compras',
+    children: [
+      { icon: Package, label: 'Pedidos de Compra', path: '/pedidos-compra' },
+    ]
+  },
 ];
 
 export function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { empresaId } = useParams<{ empresaId: string }>();
   const { user, logout } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const toggleMenu = (label: string) => {
+    setExpandedMenus(prev => 
+      prev.includes(label) 
+        ? prev.filter(l => l !== label)
+        : [...prev, label]
+    );
+  };
+
+  const renderMenuItem = (item: MenuItem, isNested = false) => {
+    const Icon = item.icon;
+    const hasChildren = item.children && item.children.length > 0;
+    const isExpanded = expandedMenus.includes(item.label);
+    
+    if (hasChildren) {
+      return (
+        <div key={item.label}>
+          <button
+            onClick={() => toggleMenu(item.label)}
+            className={cn(
+              'w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg transition-colors',
+              'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+            )}
+          >
+            <div className="flex items-center gap-3">
+              <Icon className="h-5 w-5" />
+              <span className="font-medium">{item.label}</span>
+            </div>
+            <ChevronDown className={cn(
+              'h-4 w-4 transition-transform',
+              isExpanded ? 'rotate-180' : ''
+            )} />
+          </button>
+          {isExpanded && item.children && (
+            <div className="mt-1 ml-4 space-y-1">
+              {item.children.map((child) => {
+                const ChildIcon = child.icon;
+                const fullPath = empresaId ? `/empresas/${empresaId}${child.path}` : child.path;
+                const isActive = location.pathname === fullPath;
+                
+                return (
+                  <Link
+                    key={child.path}
+                    to={fullPath || '#'}
+                    className={cn(
+                      'flex items-center gap-3 px-3 py-2 rounded-lg transition-colors',
+                      isActive
+                        ? 'bg-primary-100 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
+                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    )}
+                  >
+                    <ChildIcon className="h-4 w-4" />
+                    <span className="text-sm font-medium">{child.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    const fullPath = item.path && empresaId ? `/empresas/${empresaId}${item.path}` : item.path;
+    const isActive = fullPath && location.pathname === fullPath;
+    
+    return (
+      <Link
+        key={item.path}
+        to={fullPath || '#'}
+        className={cn(
+          'flex items-center gap-3 px-3 py-2 rounded-lg transition-colors',
+          isActive
+            ? 'bg-primary-100 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
+            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+          isNested && 'ml-4'
+        )}
+      >
+        <Icon className={cn('h-5 w-5', isNested && 'h-4 w-4')} />
+        <span className={cn('font-medium', isNested && 'text-sm')}>{item.label}</span>
+      </Link>
+    );
   };
 
   return (
@@ -67,26 +197,7 @@ export function Layout() {
 
           {/* Menu Items */}
           <nav className="space-y-2">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname.startsWith(item.path);
-              
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={cn(
-                    'flex items-center gap-3 px-3 py-2 rounded-lg transition-colors',
-                    isActive
-                      ? 'bg-primary-100 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  )}
-                >
-                  <Icon className="h-5 w-5" />
-                  <span className="font-medium">{item.label}</span>
-                </Link>
-              );
-            })}
+            {menuItems.map((item) => renderMenuItem(item))}
           </nav>
         </div>
       </aside>

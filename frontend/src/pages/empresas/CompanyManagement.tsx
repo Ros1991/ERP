@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../../stores/auth.store';
+import { useAuthStore } from '../../stores/useAuthStore';
 import { Building2, Plus, Edit, Trash2, LogOut, Eye } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -42,7 +42,7 @@ export function CompanyManagement() {
   const handleSelectCompany = (companyId: number) => {
     // Store selected company in localStorage or state
     localStorage.setItem('selectedCompanyId', companyId.toString());
-    navigate(`/dashboard/${companyId}`);
+    navigate(`/empresas/${companyId}/dashboard`);
   };
 
   const handleCreateCompany = async (e: React.FormEvent) => {

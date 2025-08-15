@@ -1,10 +1,6 @@
 import api from '../../lib/axios';
 import { API_CONFIG } from '../../config/api.config';
-import type {
-  Empresa,
-  CreateEmpresaDTO,
-  UpdateEmpresaDTO,
-} from '../../models/empresa/Empresa.model';
+import type { Empresa, CreateEmpresaDTO, UpdateEmpresaDTO } from '../../models/empresa/Empresa.model';
 import type { PaginatedResponse, QueryParams } from '../../types/common.types';
 
 class EmpresaService {

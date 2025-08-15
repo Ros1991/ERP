@@ -1,35 +1,30 @@
 export interface Tarefa {
-  id: number;
+  tarefaId: number;
   empresaId: number;
-  tarefaTipoId: number;
+  tipoId?: number;
   titulo: string;
   descricao?: string;
+  status: 'PENDENTE' | 'EM_ANDAMENTO' | 'PAUSADA' | 'PARADA' | 'CONCLUIDA' | 'CANCELADA';
   prioridade: 'BAIXA' | 'MEDIA' | 'ALTA' | 'URGENTE';
-  status: 'PENDENTE' | 'EM_ANDAMENTO' | 'CONCLUIDA' | 'CANCELADA';
   dataInicio?: string;
-  dataFim?: string;
   dataPrazo?: string;
-  responsavelId?: number;
-  observacoes?: string;
-  isActive: boolean;
+  dataConclusao?: string;
+  isDeleted: boolean;
+  deletedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateTarefaDTO {
   empresaId: number;
-  tarefaTipoId: number;
+  tipoId?: number;
   titulo: string;
   descricao?: string;
-  prioridade: 'BAIXA' | 'MEDIA' | 'ALTA' | 'URGENTE';
+  status?: 'PENDENTE' | 'EM_ANDAMENTO' | 'PAUSADA' | 'PARADA' | 'CONCLUIDA' | 'CANCELADA';
+  prioridade?: 'BAIXA' | 'MEDIA' | 'ALTA' | 'URGENTE';
   dataInicio?: string;
   dataPrazo?: string;
-  responsavelId?: number;
-  observacoes?: string;
+  dataConclusao?: string;
 }
 
-export interface UpdateTarefaDTO extends Partial<CreateTarefaDTO> {
-  status?: 'PENDENTE' | 'EM_ANDAMENTO' | 'CONCLUIDA' | 'CANCELADA';
-  dataFim?: string;
-  isActive?: boolean;
-}
+export interface UpdateTarefaDTO extends Partial<CreateTarefaDTO> {}

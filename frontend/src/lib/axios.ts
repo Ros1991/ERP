@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { API_CONFIG } from '../config/api.config';
-import { useAuthStore } from '../stores/useAuthStore.js';
+import { useAuthStore } from '../stores/useAuthStore';
 
 const api = axios.create({
   baseURL: API_CONFIG.baseURL,

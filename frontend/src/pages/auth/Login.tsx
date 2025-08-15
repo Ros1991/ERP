@@ -1,18 +1,20 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useNavigate, Link } from 'react-router-dom';
+import { Eye, EyeOff, Building2, LogIn } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { Eye, EyeOff, LogIn, Building2 } from 'lucide-react';
+
+import { authService } from '../../services/auth/auth.service';
+import { useAuthStore } from '../../stores/useAuthStore';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
-import { authService } from '../../services/auth/auth.service';
-import { useAuthStore } from '../../stores/auth.store';
 
 const loginSchema = z.object({
-  email: z.string().email('E-mail inválido'),
-  password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
+  email: z.string().email('Email inválido'),
+  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
+  rememberMe: z.boolean().default(false),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -29,17 +31,33 @@ export function Login() {
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+      rememberMe: false,
+    },
   });
 
   const onSubmit = async (data: LoginFormData) => {
     try {
       setIsLoading(true);
-      const response = await authService.login(data);
-      login(response.user, response.token);
+      console.log('Enviando dados de login:', { email: data.email, password: '***' });
+      const response = await authService.login({ email: data.email, password: data.password });
+      console.log('Resposta do login:', response);
+      console.log('Token recebido:', response.token);
+      console.log('User recebido:', response.user);
+      console.log('RefreshToken recebido:', response.refreshToken);
+      
+      if (!response.token) {
+        console.error('Token não encontrado na resposta do login');
+        toast.error('Erro na autenticação: token não recebido');
+        return;
+      }
+      
+      login(response.user, response.token, undefined, data.rememberMe);
       toast.success('Login realizado com sucesso!');
       navigate('/companies');
     } catch (error: any) {
       console.error('Erro no login:', error);
+      console.log('Resposta de erro completa:', error.response);
       // O axios interceptor já exibe o toast de erro, 
       // mas vamos garantir que o erro seja mostrado
       if (error?.response?.data?.message) {
@@ -108,6 +126,7 @@ export function Login() {
           <div className="flex items-center justify-between">
             <label className="flex items-center">
               <input
+                {...register('rememberMe')}
                 type="checkbox"
                 className="rounded border-gray-300 bg-gray-50 text-blue-600 focus:ring-blue-500"
               />

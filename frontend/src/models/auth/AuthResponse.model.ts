@@ -1,8 +1,11 @@
 import type { User } from './User.model';
 
 export interface AuthResponse {
-  user: User;
+  user: {
+    userId: number;
+    email: string;
+    nome: string;
+  };
   token: string;
-  refreshToken?: string;
-  expiresIn?: number;
+  expiresIn: string;
 }

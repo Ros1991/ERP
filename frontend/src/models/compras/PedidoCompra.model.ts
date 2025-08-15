@@ -1,55 +1,28 @@
 export interface PedidoCompra {
-  id: number;
+  pedidoCompraId: number;
   empresaId: number;
-  fornecedorId: number;
-  numeroPedido: string;
-  dataPedido: string;
-  dataEntregaPrevista?: string;
-  dataEntregaRealizada?: string;
-  status: 'RASCUNHO' | 'APROVADO' | 'ENVIADO' | 'RECEBIDO_PARCIAL' | 'RECEBIDO' | 'CANCELADO';
+  terceiroId: number;
+  numero: string;
+  data: string;
+  prazoEntrega?: string;
+  status: 'PENDENTE' | 'APROVADO' | 'RECUSADO' | 'ENTREGUE' | 'CANCELADO';
   valorTotal: number;
-  desconto?: number;
-  valorFrete?: number;
-  observacoes?: string;
-  aprovadoPor?: number;
-  dataAprovacao?: string;
+  observacao?: string;
+  isDeleted: boolean;
+  deletedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface PedidoCompraItem {
-  id: number;
-  pedidoCompraId: number;
-  descricao: string;
-  unidade: string;
-  quantidade: number;
-  valorUnitario: number;
-  valorTotal: number;
-  observacoes?: string;
-}
-
 export interface CreatePedidoCompraDTO {
   empresaId: number;
-  fornecedorId: number;
-  dataPedido: string;
-  dataEntregaPrevista?: string;
-  itens: CreatePedidoCompraItemDTO[];
-  desconto?: number;
-  valorFrete?: number;
-  observacoes?: string;
+  terceiroId: number;
+  numero: string;
+  data: string;
+  prazoEntrega?: string;
+  status?: 'PENDENTE' | 'APROVADO' | 'RECUSADO' | 'ENTREGUE' | 'CANCELADO';
+  valorTotal: number;
+  observacao?: string;
 }
 
-export interface CreatePedidoCompraItemDTO {
-  descricao: string;
-  unidade: string;
-  quantidade: number;
-  valorUnitario: number;
-  observacoes?: string;
-}
-
-export interface UpdatePedidoCompraDTO extends Partial<Omit<CreatePedidoCompraDTO, 'itens'>> {
-  status?: 'RASCUNHO' | 'APROVADO' | 'ENVIADO' | 'RECEBIDO_PARCIAL' | 'RECEBIDO' | 'CANCELADO';
-  dataEntregaRealizada?: string;
-  aprovadoPor?: number;
-  dataAprovacao?: string;
-}
+export interface UpdatePedidoCompraDTO extends Partial<CreatePedidoCompraDTO> {}

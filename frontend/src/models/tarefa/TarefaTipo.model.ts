@@ -1,12 +1,11 @@
 export interface TarefaTipo {
-  id: number;
+  tipoId: number;
   empresaId: number;
   nome: string;
-  descricao?: string;
+  gerenteFuncionarioId?: number;
+  centroCustoId?: number;
   cor?: string;
-  icone?: string;
-  ordem?: number;
-  isActive: boolean;
+  ativo: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -14,12 +13,10 @@ export interface TarefaTipo {
 export interface CreateTarefaTipoDTO {
   empresaId: number;
   nome: string;
-  descricao?: string;
+  gerenteFuncionarioId?: number;
+  centroCustoId?: number;
   cor?: string;
-  icone?: string;
-  ordem?: number;
+  ativo?: boolean;
 }
 
-export interface UpdateTarefaTipoDTO extends Partial<CreateTarefaTipoDTO> {
-  isActive?: boolean;
-}
+export interface UpdateTarefaTipoDTO extends Partial<CreateTarefaTipoDTO> {}

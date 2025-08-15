@@ -1,45 +1,85 @@
 export interface Funcionario {
-  id: number;
+  funcionarioId: number;
   empresaId: number;
-  nome: string;
-  cpf: string;
+  usuarioEmpresaId?: number;
+  nome?: string;
+  apelido: string;
+  cpf?: string;
   rg?: string;
   dataNascimento?: string;
+  endereco?: string;
   telefone?: string;
   email?: string;
-  endereco?: string;
-  cidade?: string;
-  estado?: string;
-  cep?: string;
-  cargo?: string;
-  departamento?: string;
-  dataAdmissao?: string;
-  dataDemissao?: string;
-  salarioBase?: number;
-  isActive: boolean;
+  ativo: boolean;
   createdAt: string;
   updatedAt: string;
+  deletedAt?: string;
+  isDeleted: boolean;
 }
 
 export interface CreateFuncionarioDTO {
   empresaId: number;
-  nome: string;
-  cpf: string;
+  usuarioEmpresaId?: number;
+  nome?: string;
+  apelido: string;
+  cpf?: string;
   rg?: string;
   dataNascimento?: string;
+  endereco?: string;
   telefone?: string;
   email?: string;
-  endereco?: string;
-  cidade?: string;
-  estado?: string;
-  cep?: string;
-  cargo?: string;
-  departamento?: string;
-  dataAdmissao?: string;
-  salarioBase?: number;
 }
 
 export interface UpdateFuncionarioDTO extends Partial<CreateFuncionarioDTO> {
-  dataDemissao?: string;
-  isActive?: boolean;
+  ativo?: boolean;
+}
+
+export interface FuncionarioContrato {
+  contratoId: number;
+  funcionarioId: number;
+  tipoContrato: 'CLT' | 'PJ' | 'ESTAGIARIO' | 'TERCEIRIZADO';
+  tipoPagamento: 'HORISTA' | 'DIARISTA' | 'MENSALISTA';
+  formaPagamento?: string;
+  salario: number;
+  cargaHorariaSemanal?: number;
+  dataInicio: string;
+  dataFim?: string;
+  ativo: boolean;
+  observacoes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateFuncionarioContratoDTO {
+  funcionarioId: number;
+  tipoContrato: 'CLT' | 'PJ' | 'ESTAGIARIO' | 'TERCEIRIZADO';
+  tipoPagamento: 'HORISTA' | 'DIARISTA' | 'MENSALISTA';
+  formaPagamento?: string;
+  salario: number;
+  cargaHorariaSemanal?: number;
+  dataInicio: string;
+  dataFim?: string;
+  observacoes?: string;
+}
+
+export interface FuncionarioBeneficioDesconto {
+  beneficioDescontoId: number;
+  contratoId: number;
+  tipo: 'BENEFICIO' | 'DESCONTO';
+  nome: string;
+  valor: number;
+  frequencia: 'MENSAL' | 'ANUAL' | 'UMA_VEZ' | 'FERIAS' | '13_SALARIO';
+  dataInicio: string;
+  dataFim?: string;
+}
+
+export interface CreateFuncionarioBeneficioDescontoDTO {
+  contratoId: number;
+  tipo: 'BENEFICIO' | 'DESCONTO';
+  nome: string;
+  valor: number;
+  frequencia: 'MENSAL' | 'ANUAL' | 'UMA_VEZ' | 'FERIAS' | '13_SALARIO';
+  dataInicio: string;
+  dataFim?: string;
+  ativo?: boolean;
 }

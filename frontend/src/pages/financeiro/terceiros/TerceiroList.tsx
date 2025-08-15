@@ -1,0 +1,241 @@
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Plus, Edit, Eye, Trash2, User, Building, Users } from 'lucide-react';
+import toast from 'react-hot-toast';
+import terceiroService, { type PaginatedResponse } from '../../../services/financeiro/terceiro.service';
+import type { Terceiro } from '../../../models/financeiro/Terceiro.model';
+
+export default function TerceiroList() {
+  const { empresaId } = useParams<{ empresaId: string }>();
+  const navigate = useNavigate();
+  const [terceiros, setTerceiros] = useState<Terceiro[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0
+  });
+
+  useEffect(() => {
+    if (empresaId) {
+      loadTerceiros();
+    }
+  }, [empresaId, pagination.page]);
+
+  const loadTerceiros = async () => {
+    try {
+      setLoading(true);
+      const response: PaginatedResponse<Terceiro> = await terceiroService.getAll(
+        Number(empresaId),
+        pagination.page,
+        pagination.limit
+      );
+      setTerceiros(response.data);
+      setPagination(prev => ({ ...prev, total: response.total }));
+    } catch (error) {
+      console.error('Error loading terceiros:', error);
+      toast.error('Erro ao carregar terceiros');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (terceiroId: number) => {
+    if (!window.confirm('Tem certeza que deseja excluir este terceiro?')) {
+      return;
+    }
+
+    try {
+      await terceiroService.delete(Number(empresaId), terceiroId);
+      toast.success('Terceiro excluído com sucesso');
+      loadTerceiros();
+    } catch (error) {
+      console.error('Error deleting terceiro:', error);
+      toast.error('Erro ao excluir terceiro');
+    }
+  };
+
+  const getTipoIcon = (tipo: string) => {
+    switch (tipo) {
+      case 'CLIENTE': return <User className="h-5 w-5" />;
+      case 'FORNECEDOR': return <Building className="h-5 w-5" />;
+      case 'AMBOS': return <Users className="h-5 w-5" />;
+      default: return <User className="h-5 w-5" />;
+    }
+  };
+
+  const getTipoColor = (tipo: string) => {
+    switch (tipo) {
+      case 'CLIENTE': return 'bg-blue-100 text-blue-800';
+      case 'FORNECEDOR': return 'bg-orange-100 text-orange-800';
+      case 'AMBOS': return 'bg-purple-100 text-purple-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const formatDocument = (doc: string, tipo: string) => {
+    if (tipo === 'FISICA') {
+      // Format CPF: 000.000.000-00
+      return doc.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    } else {
+      // Format CNPJ: 00.000.000/0000-00
+      return doc.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+    }
+  };
+
+  const totalPages = Math.ceil(pagination.total / pagination.limit);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-gray-900">Terceiros</h1>
+        <button
+          onClick={() => navigate(`/empresas/${empresaId}/terceiros/novo`)}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          <Plus className="h-5 w-5" />
+          Novo Terceiro
+        </button>
+      </div>
+
+      {terceiros.length === 0 ? (
+        <div className="bg-white rounded-lg shadow p-6 text-center text-gray-500">
+          Nenhum terceiro cadastrado
+        </div>
+      ) : (
+        <>
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Nome
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Tipo
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Documento
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Contato
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Ações
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {terceiros.map((terceiro) => (
+                  <tr key={terceiro.terceiroId}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{terceiro.nome}</div>
+                      <div className="text-sm text-gray-500">
+                        {terceiro.tipoPessoa === 'FISICA' ? 'Pessoa Física' : 'Pessoa Jurídica'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getTipoColor(terceiro.tipo)}`}>
+                        {getTipoIcon(terceiro.tipo)}
+                        {terceiro.tipo}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {formatDocument(terceiro.documento, terceiro.tipoPessoa)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {terceiro.email && <div>{terceiro.email}</div>}
+                        {terceiro.telefone && <div>{terceiro.telefone}</div>}
+                        {!terceiro.email && !terceiro.telefone && <span className="text-gray-400">-</span>}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 text-xs leading-5 font-semibold rounded-full ${
+                        terceiro.ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {terceiro.ativo ? 'Ativo' : 'Inativo'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => navigate(`/empresas/${empresaId}/terceiros/${terceiro.terceiroId}`)}
+                          className="text-blue-600 hover:text-blue-900"
+                          title="Visualizar"
+                        >
+                          <Eye className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => navigate(`/empresas/${empresaId}/terceiros/${terceiro.terceiroId}/editar`)}
+                          className="text-yellow-600 hover:text-yellow-900"
+                          title="Editar"
+                        >
+                          <Edit className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(terceiro.terceiroId)}
+                          className="text-red-600 hover:text-red-900"
+                          title="Excluir"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center space-x-2">
+              <button
+                onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                disabled={pagination.page === 1}
+                className="px-3 py-1 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Anterior
+              </button>
+              
+              {[...Array(totalPages)].map((_, idx) => (
+                <button
+                  key={idx + 1}
+                  onClick={() => setPagination(prev => ({ ...prev, page: idx + 1 }))}
+                  className={`px-3 py-1 rounded-lg ${
+                    pagination.page === idx + 1
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  {idx + 1}
+                </button>
+              ))}
+              
+              <button
+                onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                disabled={pagination.page === totalPages}
+                className="px-3 py-1 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Próxima
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}

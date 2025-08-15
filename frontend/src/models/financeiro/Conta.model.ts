@@ -1,31 +1,24 @@
 export interface Conta {
-  id: number;
+  contaId: number;
   empresaId: number;
+  tipo: 'SOCIO' | 'EMPRESA' | 'BANCO' | 'CAIXA';
+  socioId?: number;
+  bancoId?: number;
   nome: string;
-  tipo: 'BANCO' | 'CAIXA' | 'CARTAO_CREDITO' | 'CARTAO_DEBITO' | 'INVESTIMENTO' | 'OUTROS';
-  saldoInicial: number;
-  saldoAtual: number;
-  banco?: string;
-  agencia?: string;
-  numeroConta?: string;
-  observacoes?: string;
-  isActive: boolean;
+  saldo: number;
+  ativo: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateContaDTO {
   empresaId: number;
+  tipo: 'SOCIO' | 'EMPRESA' | 'BANCO' | 'CAIXA';
+  socioId?: number;
+  bancoId?: number;
   nome: string;
-  tipo: 'BANCO' | 'CAIXA' | 'CARTAO_CREDITO' | 'CARTAO_DEBITO' | 'INVESTIMENTO' | 'OUTROS';
-  saldoInicial: number;
-  banco?: string;
-  agencia?: string;
-  numeroConta?: string;
-  observacoes?: string;
+  saldo?: number;
+  ativo?: boolean;
 }
 
-export interface UpdateContaDTO extends Partial<CreateContaDTO> {
-  saldoAtual?: number;
-  isActive?: boolean;
-}
+export interface UpdateContaDTO extends Partial<CreateContaDTO> {}
