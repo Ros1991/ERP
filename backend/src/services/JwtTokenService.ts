@@ -37,4 +37,15 @@ export class JwtTokenService extends BaseService<JwtToken> {
   protected async validateBeforeDelete(id: number, entity: JwtToken): Promise<void> {
     // Add specific validation logic here
   }
+
+  /**
+   * Override create to handle JwtToken without updatedAt column
+   */
+  async create(createDto: IDto): Promise<IDto> {
+    await this.validateBeforeCreate(createDto);
+    const entityData = this.baseMapper.toEntity(createDto);
+    const entity = await this.jwttokenRepository.create(entityData as any);
+    await this.afterCreate(entity);
+    return this.baseMapper.toResponseDto(entity);
+  }
 }

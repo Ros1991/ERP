@@ -1,4 +1,4 @@
-import { LoginDto, ForgotPasswordDto, ResetPasswordDto, ChangePasswordDto, LoginResponseDto } from '../dtos/AuthDto';
+import { LoginDto, RegisterDto, ForgotPasswordDto, ResetPasswordDto, ChangePasswordDto, LoginResponseDto } from '../dtos/AuthDto';
 import { UserService } from './UserService';
 import { JwtTokenService } from './JwtTokenService';
 import { UserRepository } from '../repositories/UserRepository';
@@ -17,6 +17,56 @@ export class AuthService {
     this.userService = new UserService();
     this.jwtTokenService = new JwtTokenService();
     this.userRepository = new UserRepository();
+  }
+
+  /**
+   * Register new user
+   */
+  async register(registerDto: RegisterDto): Promise<LoginResponseDto> {
+    const { nome, email, password } = registerDto;
+
+    // Check if user already exists
+    const existingUser = await this.userService.findByEmail(email);
+    if (existingUser) {
+      throw new AppError('Email já está em uso', 409);
+    }
+
+    // Create new user
+    const createUserDto = {
+      nome,
+      email,
+      password
+    };
+
+    const userDto = await this.userService.create(createUserDto);
+    
+    // Convert DTO to User entity for token generation
+    const user = new User();
+    user.userId = (userDto as any).userId;
+    user.email = (userDto as any).email;
+    user.nome = (userDto as any).nome;
+    user.createdAt = (userDto as any).createdAt;
+    user.updatedAt = (userDto as any).updatedAt;
+
+    // Generate JWT token
+    const token = this.generateJWT(user);
+    const expiresIn = process.env.JWT_EXPIRES_IN || '24h';
+
+    // Store JWT token in database
+    await this.storeJwtToken(user.userId, token);
+
+    // Return login response
+    const loginResponse: LoginResponseDto = {
+      user: {
+        userId: user.userId,
+        email: user.email,
+        nome: user.nome
+      },
+      token,
+      expiresIn
+    };
+
+    return loginResponse;
   }
 
   /**

@@ -25,17 +25,7 @@ export class User extends SoftDeleteBaseEntity {
     this.passwordHash = value;
   }
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt!: Date;
-
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  updatedAt!: Date;
-
-  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
-  deletedAt!: Date | null;
-
-  @Column({ name: 'is_deleted', type: 'boolean', default: false })
-  isDeleted!: boolean;
+  // Inherited from SoftDeleteBaseEntity: createdAt, updatedAt, deletedAt, isDeleted
 
   @Column({ name: 'reset_token_hash', type: 'varchar', length: 255, nullable: true })
   resetTokenHash?: string;

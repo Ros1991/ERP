@@ -34,6 +34,23 @@ export class ResetPasswordDto implements IDto {
   newPassword!: string;
 }
 
+// REGISTER
+export class RegisterDto implements IDto {
+  @IsNotEmpty()
+  @IsString()
+  @Length(3, 100)
+  nome!: string;
+
+  @IsNotEmpty()
+  @IsEmail()
+  email!: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @Length(6, 100)
+  password!: string;
+}
+
 // CHANGE PASSWORD
 export class ChangePasswordDto implements IDto {
   @IsNotEmpty()

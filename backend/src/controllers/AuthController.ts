@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { AuthService } from '@/services/AuthService';
-import { LoginDto, ForgotPasswordDto, ResetPasswordDto, ChangePasswordDto } from '@/dtos/AuthDto';
+import { LoginDto, RegisterDto, ForgotPasswordDto, ResetPasswordDto, ChangePasswordDto } from '@/dtos/AuthDto';
 import { AppError } from '@/core/errors/AppError';
 
 export class AuthController {
@@ -9,6 +9,24 @@ export class AuthController {
   constructor() {
     this.authService = new AuthService();
   }
+
+  /**
+   * Register new user
+   */
+  register = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const registerDto: RegisterDto = req.body;
+      const result = await this.authService.register(registerDto);
+
+      res.status(201).json({
+        success: true,
+        message: 'Usuário registrado com sucesso',
+        data: result,
+      });
+    } catch (error) {
+      this.handleError(res, error);
+    }
+  };
 
   /**
    * Login user

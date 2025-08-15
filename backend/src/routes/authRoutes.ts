@@ -2,10 +2,13 @@ import { Router } from 'express';
 import { AuthController } from '@/controllers/AuthController';
 import { authenticate } from '@/middleware/authMiddleware';
 import { validateBody } from '@/core/validation/validationMiddleware';
-import { LoginDto, ForgotPasswordDto, ResetPasswordDto, ChangePasswordDto } from '@/dtos/AuthDto';
+import { LoginDto, RegisterDto, ForgotPasswordDto, ResetPasswordDto, ChangePasswordDto } from '@/dtos/AuthDto';
 
 const router = Router();
 const authController = new AuthController();
+
+// POST /auth/register - User registration
+router.post('/register', validateBody(RegisterDto), authController.register);
 
 // POST /auth/login - User login
 router.post('/login', validateBody(LoginDto), authController.login);

@@ -1,9 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
-import { BaseEntity } from '@/core/base/BaseEntity';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, BaseEntity as TypeOrmBaseEntity } from 'typeorm';
 import { User } from '@/entities/User';
 
 @Entity('jwt_token')
-export class JwtToken extends BaseEntity {
+export class JwtToken extends TypeOrmBaseEntity {
   @PrimaryGeneratedColumn('increment', { name: 'token_id' })
   tokenId!: number;
 

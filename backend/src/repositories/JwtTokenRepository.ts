@@ -1,4 +1,4 @@
-import { SelectQueryBuilder } from 'typeorm';
+import { SelectQueryBuilder, DeepPartial } from 'typeorm';
 import { BaseRepository } from '@/core/base/BaseRepository';
 import { JwtToken } from '@/entities/JwtToken';
 
@@ -48,6 +48,14 @@ export class JwtTokenRepository extends BaseRepository<JwtToken> {
         expirationDate: new Date() // This will be handled by query builder
       }
     });
+  }
+
+  /**
+   * Create new JWT token (override to handle no updatedAt column)
+   */
+  async create(data: DeepPartial<JwtToken>): Promise<JwtToken> {
+    const entity = this.repository.create(data);
+    return await this.repository.save(entity);
   }
 
   /**
