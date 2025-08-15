@@ -7,6 +7,7 @@ import * as dotenv from 'dotenv';
 import { initializeDatabase } from '@/config/database';
 
 // Import routes
+import authRoutes from '@/routes/authRoutes';
 import userRoutes from '@/routes/userRoutes';
 import empresaRoutes from '@/routes/empresaRoutes';
 import jwttokenRoutes from '@/routes/jwttokenRoutes';
@@ -55,6 +56,7 @@ app.get('/health', (req, res) => {
 });
 
 // API Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/empresas', empresaRoutes);
 app.use('/api/jwt-tokens', jwttokenRoutes);

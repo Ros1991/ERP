@@ -37,6 +37,12 @@ export class User extends SoftDeleteBaseEntity {
   @Column({ name: 'is_deleted', type: 'boolean', default: false })
   isDeleted!: boolean;
 
+  @Column({ name: 'reset_token_hash', type: 'varchar', length: 255, nullable: true })
+  resetTokenHash?: string;
+
+  @Column({ name: 'reset_token_expires', type: 'timestamp', nullable: true })
+  resetTokenExpires?: Date;
+
   // Relationships
   @OneToMany(() => JwtToken, (token) => token.user)
   tokens!: JwtToken[];

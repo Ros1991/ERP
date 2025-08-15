@@ -3,7 +3,6 @@ import { UsuarioEmpresa } from '@/entities/UsuarioEmpresa';
 import { UsuarioEmpresaRepository } from '@/repositories/UsuarioEmpresaRepository';
 import { UsuarioEmpresaMapper } from '@/mappers/UsuarioEmpresaMapper';
 import { IDto } from '@/core/base/BaseDto';
-import { AppError } from '@/core/errors/AppError';
 
 export class UsuarioEmpresaService extends BaseService<UsuarioEmpresa> {
   private usuarioempresaRepository: UsuarioEmpresaRepository;

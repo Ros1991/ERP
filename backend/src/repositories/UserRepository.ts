@@ -48,5 +48,67 @@ export class UserRepository extends BaseRepository<User> {
     const count = await qb.getCount();
     return count > 0;
   }
+
+  /**
+   * Set reset token for user
+   */
+  async setResetToken(userId: number, tokenHash: string, expiresAt: Date): Promise<boolean> {
+    const result = await this.repository.update(userId, {
+      resetTokenHash: tokenHash,
+      resetTokenExpires: expiresAt
+    });
+    return result.affected !== 0;
+  }
+
+  /**
+   * Find user by valid reset token
+   */
+  async findByValidResetToken(tokenHash: string): Promise<User | null> {
+    return await this.repository.findOne({
+      where: {
+        resetTokenHash: tokenHash,
+        resetTokenExpires: new Date(), // Should be greater than current date
+        isDeleted: false
+      }
+    });
+  }
+
+  /**
+   * Find user by valid reset token with proper date comparison
+   */
+  async findByValidResetTokenWithDate(tokenHash: string): Promise<User | null> {
+    return await this.repository
+      .createQueryBuilder('user')
+      .where('user.resetTokenHash = :tokenHash', { tokenHash })
+      .andWhere('user.resetTokenExpires > :now', { now: new Date() })
+      .andWhere('user.isDeleted = false')
+      .getOne();
+  }
+
+  /**
+   * Clear reset token for user
+   */
+  async clearResetToken(userId: number): Promise<boolean> {
+    const result = await this.repository.update(userId, {
+      resetTokenHash: undefined,
+      resetTokenExpires: undefined
+    });
+    return result.affected !== 0;
+  }
+
+  /**
+   * Clear expired reset tokens
+   */
+  async clearExpiredResetTokens(): Promise<void> {
+    await this.repository
+      .createQueryBuilder()
+      .update(User)
+      .set({ 
+        resetTokenHash: undefined, 
+        resetTokenExpires: undefined 
+      })
+      .where('resetTokenExpires < :now', { now: new Date() })
+      .execute();
+  }
 }
 
