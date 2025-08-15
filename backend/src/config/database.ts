@@ -1,46 +1,74 @@
 import { DataSource } from 'typeorm';
-import { config } from 'dotenv';
-import path from 'path';
+import * as dotenv from 'dotenv';
 
 // Load environment variables
-config();
+dotenv.config();
+
+// Import all entities
+import { User } from '@/entities/User';
+import { JwtToken } from '@/entities/JwtToken';
+import { Empresa } from '@/entities/Empresa';
+import { UsuarioEmpresa } from '@/entities/UsuarioEmpresa';
+import { Role } from '@/entities/Role';
+import { Funcionario } from '@/entities/Funcionario';
+import { FuncionarioContrato } from '@/entities/FuncionarioContrato';
+import { FuncionarioBeneficioDesconto } from '@/entities/FuncionarioBeneficioDesconto';
+import { TarefaTipo } from '@/entities/TarefaTipo';
+import { Tarefa } from '@/entities/Tarefa';
+import { TarefaFuncionarioStatus } from '@/entities/TarefaFuncionarioStatus';
+import { TarefaFuncionarioStatusHistoria } from '@/entities/TarefaFuncionarioStatusHistoria';
+import { TarefaHistoria } from '@/entities/TarefaHistoria';
+import { Conta } from '@/entities/Conta';
+import { CentroCusto } from '@/entities/CentroCusto';
+import { Terceiro } from '@/entities/Terceiro';
+import { TransacaoFinanceira } from '@/entities/TransacaoFinanceira';
+import { TransacaoCentroCusto } from '@/entities/TransacaoCentroCusto';
+import { Emprestimo } from '@/entities/Emprestimo';
+import { PedidoCompra } from '@/entities/PedidoCompra';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '5432'),
   username: process.env.DB_USERNAME || 'postgres',
-  password: process.env.DB_PASSWORD || 'postgres',
-  database: process.env.DB_DATABASE || 'erp_system',
+  password: process.env.DB_PASSWORD || 'password',
+  database: process.env.DB_DATABASE || 'erp',
   schema: process.env.DB_SCHEMA || 'public',
-  synchronize: false, // Always use migrations in production
-  logging: false, //process.env.NODE_ENV === 'development',
-  entities: [path.join(__dirname, '../entities/**/*.{ts,js}')],
-  migrations: [path.join(__dirname, '../migrations/**/*.{ts,js}')],
-  subscribers: [path.join(__dirname, '../subscribers/**/*.{ts,js}')],
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  synchronize: false, // Use migrations instead
+  logging: false,
+  entities: [
+    User,
+    JwtToken,
+    Empresa,
+    UsuarioEmpresa,
+    Role,
+    Funcionario,
+    FuncionarioContrato,
+    FuncionarioBeneficioDesconto,
+    TarefaTipo,
+    Tarefa,
+    TarefaFuncionarioStatus,
+    TarefaFuncionarioStatusHistoria,
+    TarefaHistoria,
+    Conta,
+    CentroCusto,
+    Terceiro,
+    TransacaoFinanceira,
+    TransacaoCentroCusto,
+    Emprestimo,
+    PedidoCompra
+  ],
+  migrations: ['./migrations/*.ts'],
+  migrationsTableName: 'migrations',
+  migrationsRun: false,
 });
 
 export const initializeDatabase = async (): Promise<void> => {
   try {
-    if (!AppDataSource.isInitialized) {
-      await AppDataSource.initialize();
-      console.log('✅ Conexão com banco de dados estabelecida com sucesso');
-    }
+    await AppDataSource.initialize();
+    console.log('✅ Database connection established successfully');
   } catch (error) {
-    console.error('❌ Erro ao conectar com o banco de dados:', error);
-    throw error;
-  }
-};
-
-export const closeDatabase = async (): Promise<void> => {
-  try {
-    if (AppDataSource.isInitialized) {
-      await AppDataSource.destroy();
-      console.log('✅ Conexão com banco de dados fechada com sucesso');
-    }
-  } catch (error) {
-    console.error('❌ Erro ao fechar conexão com banco de dados:', error);
+    console.error('❌ Error during database initialization:', error);
     throw error;
   }
 };

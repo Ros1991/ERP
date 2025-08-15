@@ -21,24 +21,22 @@
     "strictFunctionTypes": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
     "baseUrl": "./src",
     "paths": {
       "@/*": ["*"],
-      "@/config/*": ["config/*"],
-      "@/controllers/*": ["controllers/*"],
-      "@/services/*": ["services/*"],
-      "@/repositories/*": ["repositories/*"],
+      "@/core/*": ["core/*"],
       "@/entities/*": ["entities/*"],
       "@/dtos/*": ["dtos/*"],
+      "@/services/*": ["services/*"],
+      "@/controllers/*": ["controllers/*"],
+      "@/repositories/*": ["repositories/*"],
       "@/mappers/*": ["mappers/*"],
-      "@/middleware/*": ["middleware/*"],
       "@/routes/*": ["routes/*"],
+      "@/config/*": ["config/*"],
+      "@/middleware/*": ["middleware/*"],
       "@/utils/*": ["utils/*"],
-      "@/types/*": ["types/*"],
-      "@/vo/*": ["vo/*"]
+      "@/migrations/*": ["migrations/*"]
     }
   },
   "include": [

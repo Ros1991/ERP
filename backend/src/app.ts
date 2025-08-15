@@ -1,166 +1,176 @@
+import 'reflect-metadata';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
-import { config } from 'dotenv';
-import { AppDataSource } from './config/database';
-import { ResponseBuilder } from './utils/ResponseBuilder';
-import { AppError } from './utils/AppError';
-import { AdminSeed } from './seeds/AdminSeed';
+import morgan from 'morgan';
+import * as dotenv from 'dotenv';
+import { initializeDatabase } from '@/config/database';
 
 // Import routes
-import authRoutes from './routes/authRoutes';
-import employeeRoutes from './routes/employeeRoutes';
-import financialRoutes from './routes/financialRoutes';
-import taskRoutes from './routes/taskRoutes';
-import payrollRoutes from './routes/payrollRoutes';
+import userRoutes from '@/routes/userRoutes';
+import empresaRoutes from '@/routes/empresaRoutes';
+import jwttokenRoutes from '@/routes/jwttokenRoutes';
+import usuarioempresaRoutes from '@/routes/usuarioempresaRoutes';
+import roleRoutes from '@/routes/roleRoutes';
+import funcionarioRoutes from '@/routes/funcionarioRoutes';
+import funcionariocontratoRoutes from '@/routes/funcionariocontratoRoutes';
+import funcionariobeneficiodescontoRoutes from '@/routes/funcionariobeneficiodescontoRoutes';
+import tarefatipoRoutes from '@/routes/tarefatipoRoutes';
+import tarefaRoutes from '@/routes/tarefaRoutes';
+import tarefafuncionariostatusRoutes from '@/routes/tarefafuncionariostatusRoutes';
+import tarefafuncionariostatushistoriaRoutes from '@/routes/tarefafuncionariostatushistoriaRoutes';
+import tarefahistoriaRoutes from '@/routes/tarefahistoriaRoutes';
+import contaRoutes from '@/routes/contaRoutes';
+import centrocustoRoutes from '@/routes/centrocustoRoutes';
+import terceiroRoutes from '@/routes/terceiroRoutes';
+import transacaofinanceiraRoutes from '@/routes/transacaofinanceiraRoutes';
+import transacaocentrocustoRoutes from '@/routes/transacaocentrocustoRoutes';
+import emprestimoRoutes from '@/routes/emprestimoRoutes';
+import pedidocompraRoutes from '@/routes/pedidocompraRoutes';
 
 // Load environment variables
-config();
+dotenv.config();
 
 const app = express();
+const PORT = parseInt(process.env.PORT || '3000');
 
-// Security middleware
-app.use(helmet());
-
-// CORS configuration
+// Middlewares
+app.use(helmet()); // Security headers
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.FRONTEND_URL 
-    : ['http://localhost:5173', 'http://localhost:5174'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-}));
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'), // limit each IP to 100 requests per windowMs
-  message: ResponseBuilder.error('Muitas tentativas. Tente novamente em alguns minutos.'),
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-app.use(limiter);
-
-// Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+  origin: process.env.CORS_ORIGIN || '*',
+  credentials: true
+})); // Enable CORS
+app.use(morgan('combined')); // Logging
+app.use(express.json({ limit: '10mb' })); // Parse JSON bodies
+app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Parse URL-encoded bodies
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({
-    status: 'OK',
+  res.status(200).json({
+    success: true,
+    message: 'API is running',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
     environment: process.env.NODE_ENV || 'development'
   });
 });
 
-// API routes
-app.use('/api/auth', authRoutes);
-app.use('/api', employeeRoutes);
-app.use('/api', financialRoutes);
-app.use('/api', taskRoutes);
-app.use('/api', payrollRoutes);
+// API Routes
+app.use('/api/users', userRoutes);
+app.use('/api/empresas', empresaRoutes);
+app.use('/api/jwt-tokens', jwttokenRoutes);
+app.use('/api/usuario-empresas', usuarioempresaRoutes);
+app.use('/api/roles', roleRoutes);
+app.use('/api/funcionarios', funcionarioRoutes);
+app.use('/api/funcionario-contratos', funcionariocontratoRoutes);
+app.use('/api/funcionario-beneficio-descontos', funcionariobeneficiodescontoRoutes);
+app.use('/api/tarefa-tipos', tarefatipoRoutes);
+app.use('/api/tarefas', tarefaRoutes);
+app.use('/api/tarefa-funcionario-status', tarefafuncionariostatusRoutes);
+app.use('/api/tarefa-funcionario-status-historias', tarefafuncionariostatushistoriaRoutes);
+app.use('/api/tarefa-historias', tarefahistoriaRoutes);
+app.use('/api/contas', contaRoutes);
+app.use('/api/centro-custos', centrocustoRoutes);
+app.use('/api/terceiros', terceiroRoutes);
+app.use('/api/transacao-financeiras', transacaofinanceiraRoutes);
+app.use('/api/transacao-centro-custos', transacaocentrocustoRoutes);
+app.use('/api/emprestimos', emprestimoRoutes);
+app.use('/api/pedido-compras', pedidocompraRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
-  res.status(404).json(ResponseBuilder.notFound('Endpoint não encontrado'));
+  res.status(404).json({
+    success: false,
+    message: 'Endpoint not found',
+    path: req.originalUrl,
+    method: req.method
+  });
 });
 
 // Global error handler
 app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Erro não tratado:', error);
+  console.error('Global Error Handler:', error);
 
-  if (error instanceof AppError) {
-    res.status(error.statusCode).json(ResponseBuilder.error(error.message));
-    return;
+  // Handle validation errors
+  if (error.name === 'ValidationError') {
+    return res.status(400).json({
+      success: false,
+      message: 'Validation error',
+      errors: error.details || error.message
+    });
   }
 
-  // Database errors
+  // Handle database errors
   if (error.code === '23505') { // Unique constraint violation
-    res.status(409).json(ResponseBuilder.conflict('Registro já existe'));
-    return;
+    return res.status(409).json({
+      success: false,
+      message: 'Duplicate entry error',
+      error: error.detail || error.message
+    });
   }
 
   if (error.code === '23503') { // Foreign key constraint violation
-    res.status(400).json(ResponseBuilder.error('Referência inválida'));
-    return;
+    return res.status(400).json({
+      success: false,
+      message: 'Foreign key constraint error',
+      error: error.detail || error.message
+    });
   }
 
-  if (error.code === '23502') { // Not null constraint violation
-    res.status(400).json(ResponseBuilder.error('Campo obrigatório não informado'));
-    return;
+  // Handle custom app errors
+  if (error.statusCode) {
+    return res.status(error.statusCode).json({
+      success: false,
+      message: error.message || 'An error occurred'
+    });
   }
 
-  // Validation errors
-  if (error.name === 'ValidationError') {
-    const validationErrors = Object.values(error.errors).map((err: any) => err.message);
-    res.status(400).json(ResponseBuilder.validationError(validationErrors));
-    return;
-  }
-
-  // JSON parsing errors
-  if (error instanceof SyntaxError && 'body' in error) {
-    res.status(400).json(ResponseBuilder.error('JSON inválido'));
-    return;
-  }
-
-  // Default error
-  res.status(500).json(ResponseBuilder.error('Erro interno do servidor'));
+  // Default server error
+  return res.status(500).json({
+    success: false,
+    message: 'Internal server error',
+    ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+  });
 });
 
 // Initialize database and start server
-const PORT = parseInt(process.env.PORT || '3001', 10);
-
-async function startServer() {
+const startServer = async () => {
   try {
     // Initialize database connection
-    await AppDataSource.initialize();
-    console.log('✅ Conexão com banco de dados estabelecida');
-
-    // Run migrations
-    await AppDataSource.runMigrations();
-    console.log('✅ Migrations executadas com sucesso');
-
-    // Run admin seed (only if no users exist)
-    await AdminSeed.run();
-
+    await initializeDatabase();
+    
     // Start server
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(`🚀 Servidor rodando na porta ${PORT}`);
-      console.log(`📊 Ambiente: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+      console.log(`📚 API Base URL: http://localhost:${PORT}/api`);
     });
-
   } catch (error) {
-    console.error('❌ Erro ao inicializar servidor:', error);
+    console.error('❌ Failed to start server:', error);
     process.exit(1);
   }
-}
+};
 
-// Handle graceful shutdown
-process.on('SIGTERM', async () => {
-  console.log('🔄 Recebido SIGTERM, encerrando servidor...');
-  
-  if (AppDataSource.isInitialized) {
-    await AppDataSource.destroy();
-    console.log('✅ Conexão com banco de dados encerrada');
-  }
-  
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  process.exit(1);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
   process.exit(0);
 });
 
-process.on('SIGINT', async () => {
-  console.log('🔄 Recebido SIGINT, encerrando servidor...');
-  
-  if (AppDataSource.isInitialized) {
-    await AppDataSource.destroy();
-    console.log('✅ Conexão com banco de dados encerrada');
-  }
-  
+process.on('SIGINT', () => {
+  console.log('SIGINT received, shutting down gracefully');
   process.exit(0);
 });
 

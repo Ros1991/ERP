@@ -1,0 +1,7 @@
+dist/
+node_modules/
+*.js
+*.d.ts
+generate_*.sh
+fix_*.sh
+

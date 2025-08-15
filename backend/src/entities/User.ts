@@ -1,45 +1,47 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  OneToMany,
-} from 'typeorm';
-import { Company } from './Company';
-import { CompanyMember } from './CompanyMember';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
+import { SoftDeleteBaseEntity } from '@/core/base/BaseEntity';
+import { JwtToken } from '@/entities/JwtToken';
+import { UsuarioEmpresa } from '@/entities/UsuarioEmpresa';
 
-@Entity('users')
-export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
+@Entity('user')
+export class User extends SoftDeleteBaseEntity {
+  @PrimaryGeneratedColumn('increment', { name: 'user_id' })
+  userId!: number;
 
-  @Column({ type: 'varchar', length: 255 })
-  name!: string;
-
-  @Column({ type: 'varchar', length: 255, unique: true, transformer: {
-    to: (value: string) => value?.toLowerCase(),
-    from: (value: string) => value
-  }})
+  @Column({ name: 'email', type: 'varchar', length: 255, unique: true })
   email!: string;
 
-  @Column({ type: 'varchar', length: 255 })
-  password_hash!: string;
+  @Column({ name: 'nome', type: 'varchar', length: 255 })
+  nome!: string;
 
-  @Column({ type: 'text', nullable: true })
-  facial_recognition_vector!: string | null;
+  @Column({ name: 'password_hash', type: 'varchar', length: 255 })
+  passwordHash!: string;
 
-  @CreateDateColumn()
-  created_at!: Date;
+  // Alias for password_hash to match service expectations
+  get password(): string {
+    return this.passwordHash;
+  }
+  set password(value: string) {
+    this.passwordHash = value;
+  }
 
-  @UpdateDateColumn()
-  updated_at!: Date;
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt!: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  updatedAt!: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
+  deletedAt!: Date | null;
+
+  @Column({ name: 'is_deleted', type: 'boolean', default: false })
+  isDeleted!: boolean;
 
   // Relationships
-  @OneToMany(() => Company, company => company.owner)
-  owned_companies!: any[];
+  @OneToMany(() => JwtToken, (token) => token.user)
+  tokens!: JwtToken[];
 
-  @OneToMany(() => CompanyMember, companyMember => companyMember.user)
-  company_memberships!: any[];
+  @OneToMany(() => UsuarioEmpresa, (usuarioEmpresa) => usuarioEmpresa.user)
+  usuarioEmpresas!: UsuarioEmpresa[];
 }
 
