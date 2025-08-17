@@ -70,7 +70,6 @@ export const useAuthStore = create<AuthState>()(
       rememberMe: false,
 
       login: (user, token, refreshToken, rememberMe = false) => {
-        console.log('Login called with:', { user, token: !!token, rememberMe });
         set({
           user,
           token,

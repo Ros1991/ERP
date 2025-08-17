@@ -192,7 +192,6 @@ export class BaseController<Entity extends ObjectLiteral> {
         message: error.message,
       });
     } else {
-      console.log('Erro não tratado:', error.message); // Log para debug
       res.status(500).json({
         success: false,
         message: 'Erro interno do servidor',

@@ -49,16 +49,11 @@ export function CompanyManagement() {
   const handleSelectCompany = (companyId: number, e?: React.MouseEvent) => {
     e?.preventDefault();
     e?.stopPropagation();
-    console.log('🏢 Selecionando empresa:', companyId);
-    console.log('🔍 Current URL:', window.location.href);
     // Store selected company in localStorage or state
     localStorage.setItem('selectedCompanyId', companyId.toString());
-    console.log('💾 Empresa salva no localStorage:', localStorage.getItem('selectedCompanyId'));
-    console.log('🚀 Navegando para:', `/empresas/${companyId}/dashboard`);
     
     try {
       navigate(`/empresas/${companyId}/dashboard`);
-      console.log('✅ Navigate chamado com sucesso');
     } catch (error) {
       console.error('❌ Erro na navegação:', error);
     }

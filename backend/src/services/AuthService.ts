@@ -128,7 +128,6 @@ export class AuthService {
       }
     } catch (error) {
       // Token might be invalid, but logout should still succeed
-      console.log('Logout warning:', error);
     }
   }
 
@@ -158,8 +157,6 @@ export class AuthService {
     await this.userRepository.setResetToken((userDto as any).userId, tokenHash, expirationDate);
 
     // TODO: Send email with reset token (implement email service)
-    console.log(`Password reset token for ${email}: ${resetToken}`);
-
     return {
       message: 'Se o email existir em nosso sistema, você receberá instruções para redefinir sua senha.',
       success: true

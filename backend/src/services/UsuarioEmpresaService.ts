@@ -36,4 +36,12 @@ export class UsuarioEmpresaService extends BaseService<UsuarioEmpresa> {
   protected async validateBeforeDelete(id: number, entity: UsuarioEmpresa): Promise<void> {
     // Add specific validation logic here
   }
+
+  /**
+   * Verify if user has permission to access a specific empresa
+   * Used by middleware for permission checking
+   */
+  async verifyUserEmpresaPermission(userId: number, empresaId: number): Promise<boolean> {
+    return await this.usuarioempresaRepository.verifyUserEmpresaPermission(userId, empresaId);
+  }
 }

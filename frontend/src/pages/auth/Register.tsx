@@ -40,7 +40,6 @@ export function Register() {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setIsLoading(true);
-      console.log('🚀 Iniciando registro com dados:', data);
       
       const { confirmPassword, ...formData } = data;
       const registerData = {
@@ -48,25 +47,16 @@ export function Register() {
         email: formData.email,
         password: formData.password
       };
-      console.log('📤 Enviando para API:', registerData);
       
       const response = await authService.register(registerData);
-      console.log('✅ Resposta da API:', response);
       
-      console.log('🔐 Fazendo login com:', { user: response.user, token: response.token });
       login(response.user as any, response.token);
       
       toast.success('Conta criada com sucesso!');
       
       // Wait for state to persist before navigation
       setTimeout(() => {
-        const currentState = useAuthStore.getState();
-        console.log('🏪 Store state before navigation:', {
-          user: currentState.user,
-          token: currentState.token,
-          isAuthenticated: currentState.isAuthenticated
-        });
-        console.log('🔄 Navegando para /companies');
+        navigate('/companies');
         navigate('/companies');
       }, 200);
     } catch (error: any) {

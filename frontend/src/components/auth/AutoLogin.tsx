@@ -7,7 +7,6 @@ export function AutoLogin() {
   useEffect(() => {
     // Auto-login functionality - check if user data exists in storage
     if (!isAuthenticated && token && user) {
-      console.log('Auto-login: Token and user found in storage, user is now authenticated');
     }
   }, [isAuthenticated, token, user]);
 

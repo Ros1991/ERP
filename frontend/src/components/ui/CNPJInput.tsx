@@ -31,8 +31,6 @@ export const CNPJInput = forwardRef<HTMLInputElement, CNPJInputProps>(
       const rawValue = removeCnpjMask(inputValue);
       const newMaskedValue = applyCnpjMask(rawValue);
       
-      console.log('CNPJInput handleChange:', { inputValue, rawValue, newMaskedValue });
-      
       setMaskedValue(newMaskedValue);
       
       // Validate CNPJ in real-time

@@ -110,7 +110,6 @@ export class EmpresaService extends BaseService<Empresa> {
   async findByUserIdWithRole(userId: number): Promise<IDto[]> {
     // Get all UsuarioEmpresa records for the user
     const allUsuarioEmpresas = await this.usuarioEmpresaRepository.findByUserIdWithRelations(userId);
-    console.log(allUsuarioEmpresas);
     const allUsuarioEmpresasDto = allUsuarioEmpresas.map(ue => this.usuarioEmpresaMapper.toWithRelationsResponseDto(ue));
     return allUsuarioEmpresasDto;
   }

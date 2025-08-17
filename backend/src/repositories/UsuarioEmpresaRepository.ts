@@ -55,4 +55,21 @@ export class UsuarioEmpresaRepository extends BaseRepository<UsuarioEmpresa> {
       .orderBy('empresa.nome', 'ASC')
       .getMany();
   }
+
+  /**
+   * Verify if user has permission to access a specific empresa
+   * Used by middleware for permission checking
+   */
+  async verifyUserEmpresaPermission(userId: number, empresaId: number): Promise<boolean> {
+    const usuarioEmpresa = await this.repository
+      .createQueryBuilder('ue')
+      .innerJoinAndSelect('ue.empresa', 'empresa')
+      .where('ue.userId = :userId', { userId })
+      .andWhere('ue.empresaId = :empresaId', { empresaId })
+      .andWhere('ue.ativo = :ativo', { ativo: true })
+      .andWhere('empresa.isDeleted = :isDeleted', { isDeleted: false })
+      .getOne();
+
+    return !!usuarioEmpresa;
+  }
 }

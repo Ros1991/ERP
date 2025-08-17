@@ -6,11 +6,13 @@ import morgan from 'morgan';
 import * as dotenv from 'dotenv';
 import { initializeDatabase } from '@/config/database';
 
-// Import routes
+// Import global routes (non-empresa dependent)
 import authRoutes from '@/routes/authRoutes';
 import userRoutes from '@/routes/userRoutes';
 import empresaRoutes from '@/routes/empresaRoutes';
 import jwttokenRoutes from '@/routes/jwttokenRoutes';
+
+// Import empresa-dependent routes
 import usuarioempresaRoutes from '@/routes/usuarioempresaRoutes';
 import roleRoutes from '@/routes/roleRoutes';
 import funcionarioRoutes from '@/routes/funcionarioRoutes';
@@ -28,6 +30,9 @@ import transacaofinanceiraRoutes from '@/routes/transacaofinanceiraRoutes';
 import transacaocentrocustoRoutes from '@/routes/transacaocentrocustoRoutes';
 import emprestimoRoutes from '@/routes/emprestimoRoutes';
 import pedidocompraRoutes from '@/routes/pedidocompraRoutes';
+
+// Import middleware
+import { checkEmpresaPermission } from '@/middlewares/checkEmpresaPermission';
 
 // Load environment variables
 dotenv.config();
@@ -55,28 +60,30 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API Routes
+// Global API Routes (non-empresa dependent)
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/empresas', empresaRoutes);
 app.use('/api/jwt-tokens', jwttokenRoutes);
-app.use('/api/usuario-empresas', usuarioempresaRoutes);
-app.use('/api/roles', roleRoutes);
-app.use('/api/funcionarios', funcionarioRoutes);
-app.use('/api/funcionario-contratos', funcionariocontratoRoutes);
-app.use('/api/funcionario-beneficio-descontos', funcionariobeneficiodescontoRoutes);
-app.use('/api/tarefa-tipos', tarefatipoRoutes);
-app.use('/api/tarefas', tarefaRoutes);
-app.use('/api/tarefa-funcionario-status', tarefafuncionariostatusRoutes);
-app.use('/api/tarefa-funcionario-status-historias', tarefafuncionariostatushistoriaRoutes);
-app.use('/api/tarefa-historias', tarefahistoriaRoutes);
-app.use('/api/contas', contaRoutes);
-app.use('/api/centro-custos', centrocustoRoutes);
-app.use('/api/terceiros', terceiroRoutes);
-app.use('/api/transacao-financeiras', transacaofinanceiraRoutes);
-app.use('/api/transacao-centro-custos', transacaocentrocustoRoutes);
-app.use('/api/emprestimos', emprestimoRoutes);
-app.use('/api/pedido-compras', pedidocompraRoutes);
+
+// Empresa-dependent API Routes (with empresa permission middleware)
+app.use('/api/empresas/:empresaId/usuario-empresas', checkEmpresaPermission, usuarioempresaRoutes);
+app.use('/api/empresas/:empresaId/roles', checkEmpresaPermission, roleRoutes);
+app.use('/api/empresas/:empresaId/funcionarios', checkEmpresaPermission, funcionarioRoutes);
+app.use('/api/empresas/:empresaId/funcionario-contratos', checkEmpresaPermission, funcionariocontratoRoutes);
+app.use('/api/empresas/:empresaId/funcionario-beneficio-descontos', checkEmpresaPermission, funcionariobeneficiodescontoRoutes);
+app.use('/api/empresas/:empresaId/tarefa-tipos', checkEmpresaPermission, tarefatipoRoutes);
+app.use('/api/empresas/:empresaId/tarefas', checkEmpresaPermission, tarefaRoutes);
+app.use('/api/empresas/:empresaId/tarefa-funcionario-status', checkEmpresaPermission, tarefafuncionariostatusRoutes);
+app.use('/api/empresas/:empresaId/tarefa-funcionario-status-historias', checkEmpresaPermission, tarefafuncionariostatushistoriaRoutes);
+app.use('/api/empresas/:empresaId/tarefa-historias', checkEmpresaPermission, tarefahistoriaRoutes);
+app.use('/api/empresas/:empresaId/contas', checkEmpresaPermission, contaRoutes);
+app.use('/api/empresas/:empresaId/centro-custos', checkEmpresaPermission, centrocustoRoutes);
+app.use('/api/empresas/:empresaId/terceiros', checkEmpresaPermission, terceiroRoutes);
+app.use('/api/empresas/:empresaId/transacao-financeiras', checkEmpresaPermission, transacaofinanceiraRoutes);
+app.use('/api/empresas/:empresaId/transacao-centro-custos', checkEmpresaPermission, transacaocentrocustoRoutes);
+app.use('/api/empresas/:empresaId/emprestimos', checkEmpresaPermission, emprestimoRoutes);
+app.use('/api/empresas/:empresaId/pedido-compras', checkEmpresaPermission, pedidocompraRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

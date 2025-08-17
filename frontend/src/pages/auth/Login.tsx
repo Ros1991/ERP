@@ -53,12 +53,7 @@ export function Login() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       setIsLoading(true);
-      console.log('Enviando dados de login:', { email: data.email, password: '***' });
       const response = await authService.login({ email: data.email, password: data.password });
-      console.log('Resposta do login:', response);
-      console.log('Token recebido:', response.token);
-      console.log('User recebido:', response.user);
-      console.log('RefreshToken recebido:', response.refreshToken);
       
       if (!response.token) {
         console.error('Token não encontrado na resposta do login');
@@ -74,7 +69,6 @@ export function Login() {
       navigate('/companies');
     } catch (error: any) {
       console.error('Erro no login:', error);
-      console.log('Resposta de erro completa:', error.response);
       // O axios interceptor já exibe o toast de erro, 
       // mas vamos garantir que o erro seja mostrado
       if (error?.response?.data?.message) {
