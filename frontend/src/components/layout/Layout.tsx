@@ -12,17 +12,16 @@ import {
   Settings,
   ChevronDown,
   Home,
-  ChevronRight,
-  UserCheck,
-  FileText,
   CheckSquare,
   Wallet,
   UserCog,
   TrendingUp,
-  Package
+  Package,
+  IdCard,
+  KeyRound,
+  HandCoins
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/auth.store';
-import { Button } from '../ui/Button';
 import { cn } from '../../utils/cn';
 
 interface MenuItem {
@@ -34,14 +33,13 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   { icon: Home, label: 'Dashboard', path: '/dashboard' },
-  { icon: Building2, label: 'Empresas', path: '/empresas' },
   { 
     icon: Users, 
     label: 'Funcionários',
     children: [
-      { icon: Users, label: 'Funcionários', path: '/funcionarios' },
-      { icon: FileText, label: 'Contratos', path: '/funcionario-contratos' },
-      { icon: Wallet, label: 'Benefícios/Descontos', path: '/funcionario-beneficios' },
+      { icon: IdCard, label: 'Funcionários', path: '/funcionarios' },
+      { icon: Users, label: 'Usuários', path: '/funcionario-contratos' },
+      { icon: KeyRound, label: 'Cargos', path: '/funcionario-beneficios' },
     ]
   },
   { 
@@ -50,7 +48,6 @@ const menuItems: MenuItem[] = [
     children: [
       { icon: ClipboardList, label: 'Tarefas', path: '/tarefas' },
       { icon: CheckSquare, label: 'Tipos de Tarefa', path: '/tarefa-tipos' },
-      { icon: UserCheck, label: 'Status de Tarefas', path: '/tarefa-status' },
     ]
   },
   { 
@@ -60,6 +57,7 @@ const menuItems: MenuItem[] = [
       { icon: Wallet, label: 'Contas', path: '/contas' },
       { icon: UserCog, label: 'Terceiros', path: '/terceiros' },
       { icon: TrendingUp, label: 'Transações', path: '/transacoes-financeiras' },
+      { icon: HandCoins, label: 'Emprestimos', path: '/emprestimos' },
       { icon: Building2, label: 'Centros de Custo', path: '/centros-custo' },
     ]
   },
@@ -235,6 +233,14 @@ export function Layout() {
 
                 {userMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+                    <Link
+                      to="/companies"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <Building2 className="h-4 w-4" />
+                      Selecionar Empresa
+                    </Link>
+                    <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
                     <Link
                       to="/settings"
                       className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
