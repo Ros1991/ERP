@@ -14,7 +14,7 @@ export const checkEmpresaPermission = async (
 ): Promise<void> => {
   try {
     const empresaId = parseInt(req.params.empresaId);
-    const userId = req.userId; // Vem do middleware de autenticação JWT
+    const userId = req.user?.userId; // Vem do middleware de autenticação JWT
 
     // Validar se empresaId é um número válido
     if (!empresaId || isNaN(empresaId)) {
