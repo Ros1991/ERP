@@ -40,13 +40,51 @@ export function Register() {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setIsLoading(true);
-      const { confirmPassword, ...registerData } = data;
+      console.log('🚀 Iniciando registro com dados:', data);
+      
+      const { confirmPassword, ...formData } = data;
+      const registerData = {
+        nome: formData.nome,
+        email: formData.email,
+        password: formData.password
+      };
+      console.log('📤 Enviando para API:', registerData);
+      
       const response = await authService.register(registerData);
-      login(response.user, response.accessToken);
+      console.log('✅ Resposta da API:', response);
+      
+      console.log('🔐 Fazendo login com:', { user: response.user, token: response.token });
+      login(response.user as any, response.token);
+      
       toast.success('Conta criada com sucesso!');
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Erro no cadastro:', error);
+      
+      // Wait for state to persist before navigation
+      setTimeout(() => {
+        const currentState = useAuthStore.getState();
+        console.log('🏪 Store state before navigation:', {
+          user: currentState.user,
+          token: currentState.token,
+          isAuthenticated: currentState.isAuthenticated
+        });
+        console.log('🔄 Navegando para /companies');
+        navigate('/companies');
+      }, 200);
+    } catch (error: any) {
+      console.error('❌ Erro no cadastro:', error);
+      console.error('📋 Detalhes do erro:', {
+        message: error?.message,
+        response: error?.response?.data,
+        status: error?.response?.status
+      });
+      
+      // Exibir erro para o usuário
+      if (error?.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (error?.message) {
+        toast.error(error.message);
+      } else {
+        toast.error('Erro ao criar conta. Tente novamente.');
+      }
     } finally {
       setIsLoading(false);
     }

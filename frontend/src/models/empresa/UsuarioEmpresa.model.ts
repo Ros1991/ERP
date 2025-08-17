@@ -1,3 +1,6 @@
+import type { Empresa } from "./Empresa.model";
+import type { Role } from "../auth/Role.model";
+
 export interface UsuarioEmpresa {
   id: number;
   userId: number;
@@ -9,6 +12,9 @@ export interface UsuarioEmpresa {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+
+  empresa?: Empresa;
+  role?: Role;
 }
 
 export interface CreateUsuarioEmpresaDTO {

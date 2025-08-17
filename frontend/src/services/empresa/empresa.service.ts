@@ -2,6 +2,7 @@ import api from '../../lib/axios';
 import { API_CONFIG } from '../../config/api.config';
 import type { Empresa, CreateEmpresaDTO, UpdateEmpresaDTO } from '../../models/empresa/Empresa.model';
 import type { PaginatedResponse, QueryParams } from '../../types/common.types';
+import type { UsuarioEmpresa } from '../../models/empresa';
 
 class EmpresaService {
   async getAll(params?: QueryParams): Promise<PaginatedResponse<Empresa>> {
@@ -39,8 +40,8 @@ class EmpresaService {
     await api.delete(`${API_CONFIG.endpoints.empresas}/${id}`);
   }
 
-  async getMyEmpresas(): Promise<Empresa[]> {
-    const response = await api.get<Empresa[]>(
+  async getMyEmpresas(): Promise<UsuarioEmpresa[]> {
+    const response = await api.get<UsuarioEmpresa[]>(
       `${API_CONFIG.endpoints.empresas}/minhas`
     );
     return response.data;

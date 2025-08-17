@@ -23,6 +23,7 @@ import { Input } from '../../components/ui/Input';
 import { funcionarioService } from '../../services/funcionario/funcionario.service';
 import type { Funcionario } from '../../models/funcionario/Funcionario.model';
 import type { PaginatedResponse } from '../../types/common.types';
+import { useConfirmDialog } from '../../components/ui/ConfirmDialog';
 
 export function FuncionarioList() {
   const navigate = useNavigate();
@@ -34,6 +35,7 @@ export function FuncionarioList() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const itemsPerPage = 10;
+  const { ConfirmDialog, showConfirm } = useConfirmDialog();
 
   useEffect(() => {
     loadFuncionarios();
@@ -66,19 +68,25 @@ export function FuncionarioList() {
     }
   };
 
-  const handleDelete = async (funcionarioId: number) => {
-    if (!window.confirm('Tem certeza que deseja excluir este funcionário?')) {
-      return;
-    }
-    
-    try {
-      await funcionarioService.delete(companyId!, String(funcionarioId));
-      toast.success('Funcionário excluído com sucesso!');
-      loadFuncionarios();
-    } catch (error) {
-      console.error('Erro ao excluir funcionário:', error);
-      toast.error('Erro ao excluir funcionário');
-    }
+  const handleDelete = async (funcionario: Funcionario) => {
+    showConfirm({
+      title: 'Excluir Funcionário',
+      message: `Tem certeza que deseja excluir o funcionário "${funcionario.nome || funcionario.apelido}"?`,
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          setLoading(true);
+          await funcionarioService.delete(companyId!, String(funcionario.funcionarioId));
+          toast.success('Funcionário excluído com sucesso!');
+          loadFuncionarios();
+        } catch (error) {
+          console.error('Erro ao excluir funcionário:', error);
+          toast.error('Erro ao excluir funcionário');
+        } finally {
+          setLoading(false);
+        }
+      }
+    });
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -288,7 +296,7 @@ export function FuncionarioList() {
                             <Edit2 className="h-4 w-4" />
                           </button>
                           <button
-                            onClick={() => handleDelete(funcionario.funcionarioId)}
+                            onClick={() => handleDelete(funcionario)}
                             className="text-red-600 hover:text-red-900"
                             title="Excluir"
                           >
@@ -331,6 +339,8 @@ export function FuncionarioList() {
           )}
         </>
       )}
+      
+      <ConfirmDialog />
     </div>
   );
 }

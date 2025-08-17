@@ -22,8 +22,7 @@ export class EmpresaController extends BaseController<Empresa> {
         });
         return;
       }
-
-      const result = await this.empresaService.findByUserId(req.user.userId);
+      const result = await this.empresaService.findByUserIdWithRole(req.user.userId);
       res.status(200).json(result);
     } catch (error) {
       this.handleError(res, error);

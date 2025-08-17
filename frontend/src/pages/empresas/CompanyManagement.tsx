@@ -1,17 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../../stores/useAuthStore';
+import { useAuthStore } from '../../stores/auth.store';
 import { Building2, Plus, Edit, Trash2, LogOut, Eye } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { CNPJInput } from '../../components/ui/CNPJInput';
+import { useConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { applyCnpjMask } from '../../utils/cnpj';
 import { empresaService } from '../../services/empresa/empresa.service';
 import { toast } from 'react-hot-toast';
 import type { Empresa, CreateEmpresaDTO } from '../../models/empresa/Empresa.model';
+import type { UsuarioEmpresa } from '../../models/empresa';
 
 export function CompanyManagement() {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
-  const [companies, setCompanies] = useState<Empresa[]>([]);
+  const { showConfirm, ConfirmDialog } = useConfirmDialog();
+  const [companies, setCompanies] = useState<UsuarioEmpresa[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -30,7 +35,9 @@ export function CompanyManagement() {
     try {
       setIsLoading(true);
       const data = await empresaService.getMyEmpresas();
-      setCompanies(data);
+      // Ordenar sempre por data de criação (mais recente primeiro)
+      const sortedData = data;
+      setCompanies(sortedData);
     } catch (error) {
       console.error('Erro ao carregar empresas:', error);
       toast.error('Erro ao carregar empresas');
@@ -39,10 +46,22 @@ export function CompanyManagement() {
     }
   };
 
-  const handleSelectCompany = (companyId: number) => {
+  const handleSelectCompany = (companyId: number, e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    console.log('🏢 Selecionando empresa:', companyId);
+    console.log('🔍 Current URL:', window.location.href);
     // Store selected company in localStorage or state
     localStorage.setItem('selectedCompanyId', companyId.toString());
-    navigate(`/empresas/${companyId}/dashboard`);
+    console.log('💾 Empresa salva no localStorage:', localStorage.getItem('selectedCompanyId'));
+    console.log('🚀 Navegando para:', `/empresas/${companyId}/dashboard`);
+    
+    try {
+      navigate(`/empresas/${companyId}/dashboard`);
+      console.log('✅ Navigate chamado com sucesso');
+    } catch (error) {
+      console.error('❌ Erro na navegação:', error);
+    }
   };
 
   const handleCreateCompany = async (e: React.FormEvent) => {
@@ -82,16 +101,23 @@ export function CompanyManagement() {
   };
 
   const handleDeleteCompany = async (company: Empresa) => {
-    if (window.confirm(`Tem certeza que deseja excluir a empresa ${company.nome}?`)) {
-      try {
-        await empresaService.delete(company.empresaId.toString());
-        toast.success('Empresa excluída com sucesso!');
-        loadCompanies();
-      } catch (error) {
-        console.error('Erro ao excluir empresa:', error);
-        toast.error('Erro ao excluir empresa');
+    showConfirm({
+      title: 'Excluir Empresa',
+      message: `Tem certeza que deseja excluir a empresa "${company.nome}"? Esta ação não pode ser desfeita.`,
+      confirmText: 'Excluir',
+      cancelText: 'Cancelar',
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          await empresaService.delete(company.empresaId.toString());
+          toast.success('Empresa excluída com sucesso!');
+          loadCompanies();
+        } catch (error) {
+          console.error('Erro ao excluir empresa:', error);
+          toast.error('Erro ao excluir empresa');
+        }
       }
-    }
+    });
   };
 
   const openEditModal = (company: Empresa) => {
@@ -146,7 +172,10 @@ export function CompanyManagement() {
               <p className="text-gray-600">Gerencie suas empresas e acesse os dashboards</p>
             </div>
             <Button
-              onClick={() => setShowCreateModal(true)}
+              onClick={() => {
+                setFormData({ nome: '', cnpj: '', razaoSocial: '' });
+                setShowCreateModal(true);
+              }}
               icon={<Plus className="h-5 w-5" />}
             >
               Nova Empresa
@@ -183,22 +212,22 @@ export function CompanyManagement() {
                         <Building2 className="h-6 w-6 text-blue-600" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900">{company.nome}</h3>
-                        <p className="text-sm text-gray-500">{company.cnpj || 'CNPJ não informado'}</p>
+                        <h3 className="text-lg font-semibold text-gray-900">{company?.empresa?.nome}</h3>
+                        <p className="text-sm text-gray-500">{company?.empresa?.cnpj ? applyCnpjMask(company?.empresa?.cnpj) : 'CNPJ não informado'}</p>
                       </div>
                     </div>
                   </div>
                   
                   <div className="space-y-2 mb-4">
-                    <p className="text-sm text-gray-600">🏢 {company.razaoSocial || 'Razão social não informada'}</p>
+                    <p className="text-sm text-gray-600">🏢 {company?.empresa?.razaoSocial || 'Razão social não informada'}</p>
                     <p className="text-sm text-gray-600">📅 Criada em: {new Date(company.createdAt).toLocaleDateString('pt-BR')}</p>
-                    <p className="text-sm text-gray-600">🟢 {company.ativa ? 'Ativa' : 'Inativa'}</p>
+                    <p className="text-sm text-gray-600">🟢 {company?.empresa?.ativa ? 'Ativa' : 'Inativa'}</p>
                   </div>
 
                   <div className="flex space-x-2 pt-4 border-t border-gray-100">
                     <Button
                       size="sm"
-                      onClick={() => handleSelectCompany(company.empresaId)}
+                      onClick={(e) => handleSelectCompany(company.empresaId, e)}
                       className="flex-1"
                       icon={<Eye className="h-4 w-4" />}
                     >
@@ -207,14 +236,14 @@ export function CompanyManagement() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => openEditModal(company)}
+                      onClick={() => openEditModal(company?.empresa as Empresa)}
                       icon={<Edit className="h-4 w-4" />}
                     >
                     </Button>
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => handleDeleteCompany(company)}
+                      onClick={() => handleDeleteCompany(company?.empresa as Empresa)}
                       icon={<Trash2 className="h-4 w-4" />}
                       className="text-red-600 hover:text-red-700"
                     >
@@ -240,11 +269,10 @@ export function CompanyManagement() {
                 placeholder="Minha Empresa Ltda"
                 required
               />
-              <Input
+              <CNPJInput
                 label="CNPJ"
                 value={formData.cnpj}
                 onChange={(e) => setFormData({ ...formData, cnpj: e.target.value })}
-                placeholder="12.345.678/0001-90"
               />
               <Input
                 label="Razão Social"
@@ -283,11 +311,10 @@ export function CompanyManagement() {
                 placeholder="Minha Empresa Ltda"
                 required
               />
-              <Input
+              <CNPJInput
                 label="CNPJ"
                 value={formData.cnpj}
                 onChange={(e) => setFormData({ ...formData, cnpj: e.target.value })}
-                placeholder="12.345.678/0001-90"
               />
               <Input
                 label="Razão Social"
@@ -312,6 +339,8 @@ export function CompanyManagement() {
           </div>
         </div>
       )}
+      
+      <ConfirmDialog />
     </div>
   );
 }

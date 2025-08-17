@@ -4,16 +4,17 @@ import { Plus, Eye, Edit, Trash2, Building2, ChevronLeft, ChevronRight } from 'l
 import toast from 'react-hot-toast';
 import centroCustoService from '../../../services/financeiro/centroCusto.service';
 import type { CentroCusto } from '../../../models/financeiro/CentroCusto.model';
+import { useConfirmDialog } from '../../../components/ui/ConfirmDialog';
 
 export default function CentroCustoList() {
   const { empresaId } = useParams<{ empresaId: string }>();
   const navigate = useNavigate();
   const [centrosCusto, setCentrosCusto] = useState<CentroCusto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [deleteId, setDeleteId] = useState<number | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 10;
+  const { ConfirmDialog, showConfirm } = useConfirmDialog();
 
   useEffect(() => {
     if (empresaId) {
@@ -35,18 +36,26 @@ export default function CentroCustoList() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!deleteId) return;
-    
-    try {
-      await centroCustoService.delete(Number(empresaId), id);
-      toast.success('Centro de custo excluído com sucesso');
-      setDeleteId(null);
-      loadCentrosCusto();
-    } catch (error) {
-      console.error('Error deleting centro de custo:', error);
-      toast.error('Erro ao excluir centro de custo');
-    }
+  const deleteCentroCusto = async (centroCusto: CentroCusto) => {
+    showConfirm({
+      title: 'Excluir Centro de Custo',
+      message: `Tem certeza que deseja excluir o centro de custo "${centroCusto.nome}"?`,
+      variant: 'danger',
+      onConfirm: async () => {
+
+        try {
+          setLoading(true);
+          await centroCustoService.delete(Number(empresaId), centroCusto.centroCustoId);
+          toast.success('Centro de custo excluído com sucesso!');
+          loadCentrosCusto();
+        } catch (error) {
+          console.error('Erro ao excluir centro de custo:', error);
+          toast.error('Erro ao excluir centro de custo');
+        } finally {
+          setLoading(false);
+        }
+      }
+    });
   };
 
   if (loading && centrosCusto.length === 0) {
@@ -128,7 +137,7 @@ export default function CentroCustoList() {
                       <Edit className="h-5 w-5" />
                     </button>
                     <button
-                      onClick={() => setDeleteId(centro.centroCustoId)}
+                      onClick={() => deleteCentroCusto(centro)}
                       className="text-red-600 hover:text-red-900"
                       title="Excluir"
                     >
@@ -196,31 +205,7 @@ export default function CentroCustoList() {
         )}
       </div>
 
-      {/* Delete Confirmation Modal */}
-      {deleteId && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-sm w-full">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Confirmar Exclusão</h3>
-            <p className="text-sm text-gray-500 mb-4">
-              Tem certeza que deseja excluir este centro de custo? Esta ação não pode ser desfeita.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setDeleteId(null)}
-                className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={() => handleDelete(deleteId)}
-                className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700"
-              >
-                Excluir
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog />
     </div>
   );
 }

@@ -10,9 +10,6 @@ import { ForgotPassword } from './pages/auth/ForgotPassword';
 // Main Pages
 import { Dashboard } from './pages/Dashboard';
 import { CompanyManagement } from './pages/empresas/CompanyManagement';
-import { EmpresaList } from './pages/empresas/EmpresaList';
-import { EmpresaForm } from './pages/empresas/EmpresaForm';
-import { EmpresaView } from './pages/empresas/EmpresaView';
 
 // Financeiro
 import ContaList from './pages/financeiro/contas/ContaList';
@@ -31,6 +28,7 @@ import CentroCustoView from './pages/financeiro/centros-custo/CentroCustoView';
 // Layout & Auth
 import { Layout } from './components/layout/Layout';
 import { PrivateRoute } from './components/auth/PrivateRoute';
+import { AutoLogin } from './components/auth/AutoLogin';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -46,6 +44,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <AutoLogin />
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
@@ -121,10 +120,6 @@ function App() {
               </PrivateRoute>
             }
           >
-            <Route index element={<EmpresaList />} />
-            <Route path="nova" element={<EmpresaForm />} />
-            <Route path=":id" element={<EmpresaView />} />
-            <Route path=":id/editar" element={<EmpresaForm />} />
           </Route>
 
           {/* Root redirect */}

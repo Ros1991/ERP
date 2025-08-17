@@ -1,9 +1,21 @@
 import { BaseMapper } from '@/core/base/BaseMapper';
 import { UsuarioEmpresa } from '@/entities/UsuarioEmpresa';
-import { CreateUsuarioEmpresaDto, UpdateUsuarioEmpresaDto, UsuarioEmpresaResponseDto } from '@/dtos/UsuarioEmpresaDto';
+import { CreateUsuarioEmpresaDto, UpdateUsuarioEmpresaDto, UsuarioEmpresaResponseDto, UsuarioEmpresaWithRelationsResponseDto } from '@/dtos/UsuarioEmpresaDto';
+import { EmpresaResponseDto } from '@/dtos/EmpresaDto';
+import { RoleResponseDto } from '@/dtos/RoleDto';
 import { IDto } from '@/core/base/BaseDto';
+import { EmpresaMapper } from '@/mappers/EmpresaMapper';
+import { RoleMapper } from '@/mappers/RoleMapper';
 
 export class UsuarioEmpresaMapper extends BaseMapper<UsuarioEmpresa> {
+  private empresaMapper: EmpresaMapper;
+  private roleMapper: RoleMapper;
+
+  constructor() {
+    super();
+    this.empresaMapper = new EmpresaMapper();
+    this.roleMapper = new RoleMapper();
+  }
   
   toEntity(createDto: IDto): UsuarioEmpresa {
     const dto = createDto as CreateUsuarioEmpresaDto;
@@ -50,6 +62,29 @@ export class UsuarioEmpresaMapper extends BaseMapper<UsuarioEmpresa> {
     responseDto.ativo = entity.ativo as any;
     responseDto.createdAt = entity.createdAt as any;
     responseDto.updatedAt = entity.updatedAt as any;
+    
+    return responseDto;
+  }
+
+  toWithRelationsResponseDto(entity: UsuarioEmpresa): UsuarioEmpresaWithRelationsResponseDto {
+    const responseDto = new UsuarioEmpresaWithRelationsResponseDto();
+    
+    responseDto.usuarioEmpresaId = entity.usuarioEmpresaId as any;
+    responseDto.userId = entity.userId as any;
+    responseDto.empresaId = entity.empresaId as any;
+    responseDto.roleId = entity.roleId as any;
+    responseDto.ativo = entity.ativo as any;
+    responseDto.createdAt = entity.createdAt as any;
+    responseDto.updatedAt = entity.updatedAt as any;
+    
+    // Map relations
+    if (entity.empresa) {
+      responseDto.empresa = this.empresaMapper.toResponseDto(entity.empresa) as EmpresaResponseDto;
+    }
+    
+    if (entity.role) {
+      responseDto.role = this.roleMapper.toResponseDto(entity.role) as RoleResponseDto;
+    }
     
     return responseDto;
   }

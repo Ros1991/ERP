@@ -56,19 +56,19 @@ const quickActions = [
 export function Dashboard() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { companyId } = useParams<{ companyId: string }>();
+  const { empresaId } = useParams<{ empresaId: string }>();
   const [currentCompany, setCurrentCompany] = useState<Empresa | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadCompanyData = async () => {
-      if (!companyId) {
+      if (!empresaId) {
         navigate('/companies');
         return;
       }
 
       try {
-        const empresa = await empresaService.getById(companyId);
+        const empresa = await empresaService.getById(empresaId);
         setCurrentCompany(empresa);
       } catch (error) {
         console.error('Error loading company:', error);
@@ -79,7 +79,7 @@ export function Dashboard() {
     };
 
     loadCompanyData();
-  }, [companyId, navigate]);
+  }, [empresaId, navigate]);
 
   if (loading) {
     return (

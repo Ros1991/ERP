@@ -4,6 +4,7 @@ import { Plus, Edit, Eye, Trash2, User, Building, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
 import terceiroService, { type PaginatedResponse } from '../../../services/financeiro/terceiro.service';
 import type { Terceiro } from '../../../models/financeiro/Terceiro.model';
+import { useConfirmDialog } from '../../../components/ui/ConfirmDialog';
 
 export default function TerceiroList() {
   const { empresaId } = useParams<{ empresaId: string }>();
@@ -15,6 +16,7 @@ export default function TerceiroList() {
     limit: 10,
     total: 0
   });
+  const { ConfirmDialog, showConfirm } = useConfirmDialog();
 
   useEffect(() => {
     if (empresaId) {
@@ -40,19 +42,22 @@ export default function TerceiroList() {
     }
   };
 
-  const handleDelete = async (terceiroId: number) => {
-    if (!window.confirm('Tem certeza que deseja excluir este terceiro?')) {
-      return;
-    }
-
-    try {
-      await terceiroService.delete(Number(empresaId), terceiroId);
-      toast.success('Terceiro excluído com sucesso');
-      loadTerceiros();
-    } catch (error) {
-      console.error('Error deleting terceiro:', error);
-      toast.error('Erro ao excluir terceiro');
-    }
+  const handleDelete = async (terceiro: Terceiro) => {
+    showConfirm({
+      title: 'Confirmar Exclusão',
+      message: `Tem certeza que deseja excluir o terceiro "${terceiro.nome}"? Esta ação não pode ser desfeita.`,
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          await terceiroService.delete(Number(empresaId), terceiro.terceiroId);
+          toast.success('Terceiro excluído com sucesso');
+          loadTerceiros();
+        } catch (error) {
+          console.error('Error deleting terceiro:', error);
+          toast.error('Erro ao excluir terceiro');
+        }
+      }
+    });
   };
 
   const getTipoIcon = (tipo: string) => {
@@ -187,7 +192,7 @@ export default function TerceiroList() {
                           <Edit className="h-5 w-5" />
                         </button>
                         <button
-                          onClick={() => handleDelete(terceiro.terceiroId)}
+                          onClick={() => handleDelete(terceiro)}
                           className="text-red-600 hover:text-red-900"
                           title="Excluir"
                         >
@@ -236,6 +241,8 @@ export default function TerceiroList() {
           )}
         </>
       )}
+      
+      <ConfirmDialog />
     </div>
   );
 }

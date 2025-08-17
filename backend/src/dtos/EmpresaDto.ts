@@ -37,12 +37,14 @@ export class UpdateEmpresaDto implements IDto {
 
   @IsOptional()
   @IsString()
-  @Length(1, 18)
+  @Length(1, 18, { message: 'CNPJ deve ter entre 1 e 18 caracteres' })
+  @Transform(({ value }) => value === '' ? undefined : value)
   cnpj?: string;
 
   @IsOptional()
   @IsString()
-  @Length(1, 255)
+  @Length(1, 255, { message: 'Razão Social deve ter entre 1 e 255 caracteres' })
+  @Transform(({ value }) => value === '' ? undefined : value)
   razaoSocial?: string;
 
   @IsOptional()

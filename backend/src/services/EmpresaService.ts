@@ -5,13 +5,18 @@ import { EmpresaMapper } from '@/mappers/EmpresaMapper';
 import { IDto } from '@/core/base/BaseDto';
 import { AppError } from '@/core/errors/AppError';
 import { RoleService } from '@/services/RoleService';
+import { UsuarioEmpresaRepository } from '@/repositories/UsuarioEmpresaRepository';
+import { In } from 'typeorm';
 import { UsuarioEmpresaService } from '@/services/UsuarioEmpresaService';
+import { UsuarioEmpresaMapper } from '@/mappers/UsuarioEmpresaMapper';
 
 export class EmpresaService extends BaseService<Empresa> {
   private empresaRepository: EmpresaRepository;
   private roleService: RoleService;
+  private usuarioEmpresaRepository: UsuarioEmpresaRepository;
   private usuarioEmpresaService: UsuarioEmpresaService;
-
+  private usuarioEmpresaMapper: UsuarioEmpresaMapper;
+  
   constructor() {
     const empresaRepository = new EmpresaRepository();
     const empresaMapper = new EmpresaMapper();
@@ -20,7 +25,9 @@ export class EmpresaService extends BaseService<Empresa> {
     this.baseMapper = empresaMapper;
     this.repository = empresaRepository;
     this.roleService = new RoleService();
+    this.usuarioEmpresaRepository = new UsuarioEmpresaRepository();
     this.usuarioEmpresaService = new UsuarioEmpresaService();
+    this.usuarioEmpresaMapper = new UsuarioEmpresaMapper();
   }
 
   /**
@@ -100,26 +107,11 @@ export class EmpresaService extends BaseService<Empresa> {
   /**
    * Get companies by user ID
    */
-  async findByUserId(userId: number): Promise<IDto[]> {
+  async findByUserIdWithRole(userId: number): Promise<IDto[]> {
     // Get all UsuarioEmpresa records for the user
-    const allUsuarioEmpresas = await this.usuarioEmpresaService.findAll();
-    const userEmpresas = (allUsuarioEmpresas as any[]).filter(ue => 
-      ue.userId === userId && ue.ativo === true
-    );
-    
-    // Get the empresa IDs 
-    const empresaIds = userEmpresas.map(ue => ue.empresaId);
-    
-    if (empresaIds.length === 0) {
-      return [];
-    }
-    
-    // Get all empresas and filter by IDs
-    const allEmpresas = await this.findAll();
-    const userCompanies = (allEmpresas as any[]).filter(empresa => 
-      empresaIds.includes(empresa.empresaId)
-    );
-    
-    return userCompanies;
+    const allUsuarioEmpresas = await this.usuarioEmpresaRepository.findByUserIdWithRelations(userId);
+    console.log(allUsuarioEmpresas);
+    const allUsuarioEmpresasDto = allUsuarioEmpresas.map(ue => this.usuarioEmpresaMapper.toWithRelationsResponseDto(ue));
+    return allUsuarioEmpresasDto;
   }
 }

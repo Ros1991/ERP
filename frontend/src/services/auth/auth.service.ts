@@ -11,12 +11,12 @@ class AuthService {
     return response.data.data;
   }
 
-  async register(credentials: RegisterCredentials): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>(
+  async register(credentials: {nome: string; email: string; password: string}): Promise<AuthResponse> {
+    const response = await api.post<{success: boolean, message: string, data: AuthResponse}>(
       API_CONFIG.endpoints.auth.register, 
       credentials
     );
-    return response.data;
+    return response.data.data;
   }
 
   async logout(): Promise<void> {

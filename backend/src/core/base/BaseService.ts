@@ -38,8 +38,8 @@ export class BaseService<Entity extends ObjectLiteral> {
   /**
    * Find all entities
    */
-  async findAll(): Promise<IDto[]> {
-    const entities = await this.repository.findAll();
+  async findAll(options?: FindManyOptions<Entity>): Promise<IDto[]> {
+    const entities = await this.repository.findAll(options);
     return entities.map(entity => this.baseMapper.toResponseDto(entity));
   }
 

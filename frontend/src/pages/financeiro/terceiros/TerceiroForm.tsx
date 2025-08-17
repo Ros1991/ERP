@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import React, { useState, useEffect } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import terceiroService from '../../../services/financeiro/terceiro.service';
 import type { Terceiro, CreateTerceiroDTO, UpdateTerceiroDTO } from '../../../models/financeiro/Terceiro.model';
+import { CNPJInput } from '../../../components/ui/CNPJInput';
+import { validateCnpj } from '../../../utils/cnpj';
 
 const schema = yup.object({
   tipo: yup.string().oneOf(
@@ -17,7 +19,19 @@ const schema = yup.object({
     'Tipo de pessoa inválido'
   ).required('Tipo de pessoa é obrigatório'),
   nome: yup.string().required('Nome é obrigatório').max(255, 'Nome deve ter no máximo 255 caracteres'),
-  documento: yup.string().required('Documento é obrigatório').max(20, 'Documento deve ter no máximo 20 caracteres'),
+  documento: yup.string().required('Documento é obrigatório').test('documento', function(value) {
+    const { tipoPessoa } = this.parent;
+    if (!value) return this.createError({ message: 'Documento é obrigatório' });
+    
+    if (tipoPessoa === 'JURIDICA') {
+      if (!validateCnpj(value)) {
+        return this.createError({ message: 'CNPJ inválido' });
+      }
+    }
+    // Para pessoa física, poderia validar CPF aqui no futuro
+    
+    return true;
+  }),
   telefone: yup.string().optional(),
   email: yup.string().email('Email inválido').optional(),
   endereco: yup.string().optional(),
@@ -38,6 +52,7 @@ export default function TerceiroForm() {
     handleSubmit,
     reset,
     watch,
+    control,
     formState: { errors }
   } = useForm<FormData>({
     resolver: yupResolver(schema),
@@ -171,14 +186,31 @@ export default function TerceiroForm() {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {tipoPessoaValue === 'FISICA' ? 'CPF' : 'CNPJ'} *
             </label>
-            <input
-              type="text"
-              {...register('documento')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={loading}
-              placeholder={tipoPessoaValue === 'FISICA' ? '000.000.000-00' : '00.000.000/0000-00'}
-            />
-            {errors.documento && (
+            {tipoPessoaValue === 'JURIDICA' ? (
+              <Controller
+                name="documento"
+                control={control}
+                render={({ field: { onChange, value, name } }) => (
+                  <CNPJInput
+                    name={name}
+                    value={value}
+                    onChange={onChange}
+                    label=""
+                    error={errors.documento?.message}
+                    disabled={loading}
+                  />
+                )}
+              />
+            ) : (
+              <input
+                type="text"
+                {...register('documento')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={loading}
+                placeholder="000.000.000-00"
+              />
+            )}
+            {errors.documento && tipoPessoaValue === 'FISICA' && (
               <p className="text-red-500 text-sm mt-1">{errors.documento.message}</p>
             )}
           </div>

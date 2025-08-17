@@ -1,15 +1,16 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Building2, LogIn } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
-import { authService } from '../../services/auth/auth.service';
-import { useAuthStore } from '../../stores/useAuthStore';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
+import { authService } from '../../services/auth/auth.service';
+import { useAuthStore } from '../../stores/auth.store';
+import { saveRememberMeData, getRememberMeData } from '../../utils/rememberMe';
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -29,12 +30,25 @@ export function Login() {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
+      email: '',
+      password: '',
       rememberMe: false,
     },
   });
+
+  // Load saved form data on component mount
+  useEffect(() => {
+    const savedData = getRememberMeData();
+    if (savedData) {
+      setValue('email', savedData.email);
+      setValue('password', savedData.password);
+      setValue('rememberMe', savedData.rememberMe);
+    }
+  }, [setValue]);
 
   const onSubmit = async (data: LoginFormData) => {
     try {
@@ -51,6 +65,9 @@ export function Login() {
         toast.error('Erro na autenticação: token não recebido');
         return;
       }
+      
+      // Save form data for "Remember Me" functionality
+      saveRememberMeData(data.email, data.password, data.rememberMe);
       
       login(response.user, response.token, undefined, data.rememberMe);
       toast.success('Login realizado com sucesso!');

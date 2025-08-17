@@ -1,6 +1,8 @@
 import { IsNotEmpty, IsString, Length, IsOptional, IsEmail, IsInt, IsNumber, IsBoolean, IsEnum, IsDate } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { IDto } from '@/core/base/BaseDto';
+import { EmpresaResponseDto } from './EmpresaDto';
+import { RoleResponseDto } from './RoleDto';
 
 // CREATE
 export class CreateUsuarioEmpresaDto implements IDto {
@@ -56,4 +58,25 @@ export class UsuarioEmpresaResponseDto implements IDto {
 
   createdAt!: Date;
   updatedAt!: Date;
+}
+
+// RESPONSE WITH RELATIONS
+export class UsuarioEmpresaWithRelationsResponseDto implements IDto {
+  @IsInt()
+  usuarioEmpresaId!: number;
+  
+  userId!: number;
+  empresaId!: number;
+  roleId?: number;
+  ativo!: boolean;
+
+  createdAt!: Date;
+  updatedAt!: Date;
+
+  // Relations
+  @Type(() => EmpresaResponseDto)
+  empresa!: EmpresaResponseDto;
+
+  @Type(() => RoleResponseDto)
+  role?: RoleResponseDto;
 }

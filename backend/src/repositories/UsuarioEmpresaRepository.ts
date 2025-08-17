@@ -26,6 +26,33 @@ export class UsuarioEmpresaRepository extends BaseRepository<UsuarioEmpresa> {
     if (search.ativo !== undefined) {
       qb.andWhere('entity.ativo = :ativo', { ativo: search.ativo });
     }
+  }
 
+  /**
+   * Find UsuarioEmpresa by ID with empresa and role relations
+   */
+  async findByIdWithRelations(id: number): Promise<UsuarioEmpresa | null> {
+    return await this.repository
+      .createQueryBuilder('usuarioEmpresa')
+      .innerJoinAndSelect('usuarioEmpresa.empresa', 'empresa')
+      .innerJoinAndSelect('usuarioEmpresa.role', 'role')
+      .where('usuarioEmpresa.usuarioEmpresaId = :id', { id })
+      .andWhere('(empresa.isDeleted IS NULL OR empresa.isDeleted = false)')
+      .getOne();
+  }
+
+  /**
+   * Find UsuarioEmpresa by userId with empresa and role relations
+   */
+  async findByUserIdWithRelations(userId: number): Promise<UsuarioEmpresa[]> {
+    return await this.repository
+      .createQueryBuilder('usuarioEmpresa')
+      .innerJoinAndSelect('usuarioEmpresa.empresa', 'empresa')
+      .innerJoinAndSelect('usuarioEmpresa.role', 'role')
+      .where('usuarioEmpresa.userId = :userId', { userId })
+      .andWhere('usuarioEmpresa.ativo = true')
+      .andWhere('(empresa.isDeleted IS NULL OR empresa.isDeleted = false)')
+      .orderBy('empresa.nome', 'ASC')
+      .getMany();
   }
 }

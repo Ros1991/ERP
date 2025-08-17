@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Plus, Edit, Eye, Trash2, DollarSign, Building2, User, Wallet } from 'lucide-react';
 import toast from 'react-hot-toast';
-import contaService from '../../../services/financeiro/conta.service';
+import contaService, { type PaginatedResponse } from '../../../services/financeiro/conta.service';
 import type { Conta } from '../../../models/financeiro/Conta.model';
+import { useConfirmDialog } from '../../../components/ui/ConfirmDialog';
 
 export default function ContaList() {
   const { empresaId } = useParams<{ empresaId: string }>();
@@ -15,6 +16,7 @@ export default function ContaList() {
     limit: 10,
     total: 0
   });
+  const { ConfirmDialog, showConfirm } = useConfirmDialog();
 
   useEffect(() => {
     if (empresaId) {
@@ -40,19 +42,22 @@ export default function ContaList() {
     }
   };
 
-  const handleDelete = async (contaId: number) => {
-    if (!window.confirm('Tem certeza que deseja excluir esta conta?')) {
-      return;
-    }
-
-    try {
-      await contaService.delete(Number(empresaId), contaId);
-      toast.success('Conta excluída com sucesso');
-      loadContas();
-    } catch (error) {
-      console.error('Error deleting conta:', error);
-      toast.error('Erro ao excluir conta');
-    }
+  const handleDelete = async (conta: Conta) => {
+    showConfirm({
+      title: 'Confirmar Exclusão',
+      message: `Tem certeza que deseja excluir a conta "${conta.nome}"? Esta ação não pode ser desfeita.`,
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          await contaService.delete(Number(empresaId), conta.contaId);
+          toast.success('Conta excluída com sucesso');
+          loadContas();
+        } catch (error) {
+          console.error('Error deleting conta:', error);
+          toast.error('Erro ao excluir conta');
+        }
+      }
+    });
   };
 
   const getTipoIcon = (tipo: string) => {
@@ -175,7 +180,7 @@ export default function ContaList() {
                           <Edit className="h-5 w-5" />
                         </button>
                         <button
-                          onClick={() => handleDelete(conta.contaId)}
+                          onClick={() => handleDelete(conta)}
                           className="text-red-600 hover:text-red-900"
                           title="Excluir"
                         >
@@ -224,6 +229,8 @@ export default function ContaList() {
           )}
         </>
       )}
+      
+      <ConfirmDialog />
     </div>
   );
 }
