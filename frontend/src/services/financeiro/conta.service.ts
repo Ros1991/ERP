@@ -35,14 +35,6 @@ class ContaService {
   async delete(empresaId: number, contaId: number): Promise<void> {
     await api.delete(`/empresas/${empresaId}/contas/${contaId}`);
   }
-
-  async updateSaldo(empresaId: number, contaId: number, saldo: number): Promise<Conta> {
-    const response = await api.patch<Conta>(
-      `/empresas/${empresaId}/contas/${contaId}/saldo`,
-      { saldo }
-    );
-    return response.data;
-  }
 }
 
 export default new ContaService();
