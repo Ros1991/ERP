@@ -36,6 +36,20 @@ export class BaseService<Entity extends ObjectLiteral> {
   }
 
   /**
+   * Find entity by ID with empresa validation
+   */
+  async findByIdWithEmpresa(id: number, empresaId: number): Promise<IDto> {
+    const options = {
+      where: { empresaId } as any
+    };
+    const entity = await this.repository.findById(id, options);
+    if (!entity) {
+      throw new AppError(`${this.entityName} with id ${id} not found or access denied`, 404);
+    }
+    return this.baseMapper.toResponseDto(entity);
+  }
+
+  /**
    * Find all entities
    */
   async findAll(options?: FindManyOptions<Entity>): Promise<IDto[]> {
@@ -86,12 +100,52 @@ export class BaseService<Entity extends ObjectLiteral> {
   }
 
   /**
+   * Update entity with empresa validation
+   */
+  async updateWithEmpresa(id: number, updateDto: IDto, empresaId: number): Promise<IDto> {
+    const options = {
+      where: { empresaId } as any
+    };
+    const existingEntity = await this.repository.findById(id, options);
+    if (!existingEntity) {
+      throw new AppError(`${this.entityName} with id ${id} not found or access denied`, 404);
+    }
+    await this.validateBeforeUpdate(id, updateDto, existingEntity);
+    const entityData = this.baseMapper.toEntityFromUpdate(updateDto, existingEntity);
+    const entity = await this.repository.update(id, entityData as any);
+    if (!entity) {
+      throw new AppError(`Failed to update ${this.entityName} with id ${id}`, 500);
+    }
+    await this.afterUpdate(entity);
+    return this.baseMapper.toResponseDto(entity);
+  }
+
+  /**
    * Delete entity (uses soft delete for SoftDeleteBaseEntity, hard delete otherwise)
    */
   async delete(id: number): Promise<void> {
     const existingEntity = await this.repository.findById(id);
     if (!existingEntity) {
       throw new AppError(`${this.entityName} with id ${id} not found`, 404);
+    }
+    await this.validateBeforeDelete(id, existingEntity);
+    const deleted = await this.repository.delete(id);
+    if (!deleted) {
+      throw new AppError(`Failed to delete ${this.entityName} with id ${id}`, 500);
+    }
+    await this.afterDelete(existingEntity);
+  }
+
+  /**
+   * Delete entity with empresa validation
+   */
+  async deleteWithEmpresa(id: number, empresaId: number): Promise<void> {
+    const options = {
+      where: { empresaId } as any
+    };
+    const existingEntity = await this.repository.findById(id, options);
+    if (!existingEntity) {
+      throw new AppError(`${this.entityName} with id ${id} not found or access denied`, 404);
     }
     await this.validateBeforeDelete(id, existingEntity);
     const deleted = await this.repository.delete(id);

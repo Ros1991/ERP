@@ -6,15 +6,43 @@ import { BaseMapper } from './BaseMapper';
 export class BaseController<Entity extends ObjectLiteral> {
   
   service: BaseService<Entity>;
+  private EntityClass?: new () => Entity;
 
   constructor(
     EntityClass?: new () => Entity,
     MapperClass?: new () => BaseMapper<Entity>) {
     this.service = new BaseService<Entity>(EntityClass, MapperClass);
+    this.EntityClass = EntityClass;
   }
 
   /**
-   * List tipos de torneio with pagination and filters
+   * Check if entity has empresaId field using TypeORM metadata
+   */
+  protected hasEmpresaIdField(): boolean {
+    if (!this.EntityClass) {
+      console.log('No EntityClass provided');
+      return false;
+    }
+    
+    try {
+      const { AppDataSource } = require('../../config/database');
+      if (!AppDataSource.isInitialized) {
+        return false;
+      }
+      const repository = AppDataSource.getRepository(this.EntityClass);
+      const metadata = repository.metadata;
+      const hasEmpresaId = metadata.columns.some((column: any) => 
+        column.propertyName === 'empresaId' || column.databaseName === 'empresa_id'
+      );
+      return hasEmpresaId;
+    } catch (error) {
+      console.error('Error checking empresaId field:', error);
+      return false;
+    }
+  }
+
+  /**
+   * List with pagination and filters, automatically filtering by empresaId when available
    */
   list = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -25,6 +53,10 @@ export class BaseController<Entity extends ObjectLiteral> {
       delete filterData.sortBy;
       delete filterData.sortOrder;
 
+      if ((req as any).empresaId && this.hasEmpresaIdField()) {
+        filterData.empresaId = (req as any).empresaId;
+      }
+
       const paginationData = {
         page: sourceData.page ? parseInt(sourceData.page as string, 10) : undefined,
         limit: sourceData.limit ? parseInt(sourceData.limit as string, 10) : undefined,
@@ -32,6 +64,7 @@ export class BaseController<Entity extends ObjectLiteral> {
         sortOrder: sourceData.sortOrder as 'ASC' | 'DESC',
         search: filterData,
       };
+      
       // Execute service method with pagination and filters
       const result = await this.service.findWithPagination(paginationData);
       res.status(200).json({
@@ -45,7 +78,7 @@ export class BaseController<Entity extends ObjectLiteral> {
   };
 
   /**
-   * Get tipo de torneio by ID
+   * Get entity by ID with empresa validation when applicable
    */
   getById = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -59,13 +92,22 @@ export class BaseController<Entity extends ObjectLiteral> {
         return;
       }
 
-      const result = await this.service.findById(id);
-
-      res.status(200).json({
-        success: true,
-        message: 'Obtido com sucesso',
-        data: result,
-      });
+      // For entities with empresaId, validate access through service method
+      if ((req as any).empresaId && this.hasEmpresaIdField()) {
+        const result = await this.service.findByIdWithEmpresa(id, (req as any).empresaId);
+        res.status(200).json({
+          success: true,
+          message: 'Obtido com sucesso',
+          data: result,
+        });
+      } else {
+        const result = await this.service.findById(id);
+        res.status(200).json({
+          success: true,
+          message: 'Obtido com sucesso',
+          data: result,
+        });
+      }
 
     } catch (error) {
       this.handleError(res, error);
@@ -73,11 +115,16 @@ export class BaseController<Entity extends ObjectLiteral> {
   };
 
   /**
-   * Create new tipo de torneio
+   * Create new entity with empresaId validation when applicable
    */
   create = async (req: Request, res: Response): Promise<void> => {
     try {
       const sourceData = req.body;
+      
+      // Add empresaId if available and entity supports it
+      if ((req as any).empresaId && this.hasEmpresaIdField()) {
+        sourceData.empresaId = (req as any).empresaId;
+      }
       
       const result = await this.service.create(sourceData);
 
@@ -94,7 +141,7 @@ export class BaseController<Entity extends ObjectLiteral> {
   };
 
   /**
-   * Update tipo de torneio
+   * Update entity with empresaId validation when applicable
    */
   update = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -106,12 +153,23 @@ export class BaseController<Entity extends ObjectLiteral> {
         });
         return;
       }
-      const result = await this.service.update(id, req.body);
-      res.status(200).json({
-        success: true,
-        message: 'Atualizado com sucesso',
-        data: result,
-      });
+
+      // For entities with empresaId, validate access before update
+      if ((req as any).empresaId && this.hasEmpresaIdField()) {
+        const result = await this.service.updateWithEmpresa(id, req.body, (req as any).empresaId);
+        res.status(200).json({
+          success: true,
+          message: 'Atualizado com sucesso',
+          data: result,
+        });
+      } else {
+        const result = await this.service.update(id, req.body);
+        res.status(200).json({
+          success: true,
+          message: 'Atualizado com sucesso',
+          data: result,
+        });
+      }
 
     } catch (error) {
       this.handleError(res, error);
@@ -119,7 +177,7 @@ export class BaseController<Entity extends ObjectLiteral> {
   };
 
   /**
-   * Delete tipo de torneio
+   * Delete entity with empresaId validation when applicable
    */
   delete = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -131,11 +189,18 @@ export class BaseController<Entity extends ObjectLiteral> {
         });
         return;
       }
-      const result = await this.service.delete(id);
+
+      // For entities with empresaId, validate access before delete
+      if ((req as any).empresaId && this.hasEmpresaIdField()) {
+        await this.service.deleteWithEmpresa(id, (req as any).empresaId);
+      } else {
+        await this.service.delete(id);
+      }
+      
       res.status(200).json({
         success: true,
         message: 'Excluído com sucesso',
-        data: result,
+        data: null,
       });
     } catch (error) {
       this.handleError(res, error);

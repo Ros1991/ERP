@@ -121,9 +121,6 @@ export default function TerceiroView() {
                 {getTipoIcon(terceiro.tipo)}
                 {terceiro.tipo}
               </span>
-              <span className="inline-flex px-3 py-1 text-sm font-semibold rounded-full bg-indigo-100 text-indigo-800">
-                ID: {terceiro.terceiroId}
-              </span>
               <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
                 terceiro.ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
               }`}>

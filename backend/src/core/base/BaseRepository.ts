@@ -33,7 +33,8 @@ export class BaseRepository<T extends ObjectLiteral> {
       return 'id';
     }
     const primary = this.repository.metadata.primaryColumns[0];
-    return primary?.propertyName ?? 'id';
+    // Use database column name, not property name
+    return primary?.databaseName ?? 'id';
   }
 
   protected isSoftDelete(): boolean {
@@ -52,10 +53,15 @@ export class BaseRepository<T extends ObjectLiteral> {
     if (this.isSoftDelete()) {
       whereCondition.isDeleted = false;
     }
-    return await this.repository.findOne({
-      where: whereCondition,
-      ...options
-    });
+    
+    // Merge where conditions instead of overwriting
+    const mergedOptions = { ...options };
+    if (options?.where) {
+      mergedOptions.where = { ...whereCondition, ...(options.where as any) };
+    } else {
+      mergedOptions.where = whereCondition;
+    }
+    return await this.repository.findOne(mergedOptions);
   }
   
   /**
