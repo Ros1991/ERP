@@ -13,10 +13,8 @@ const schema = yup.object({
     'Tipo inválido'
   ).required('Tipo é obrigatório'),
   nome: yup.string().required('Nome é obrigatório').max(255, 'Nome deve ter no máximo 255 caracteres'),
-  socioId: yup.number().nullable().optional().transform((value) => (value === '' ? null : value)),
-  bancoId: yup.number().nullable().optional().transform((value) => (value === '' ? null : value)),
-  saldo: yup.number().optional().default(0),
-  ativo: yup.boolean().optional().default(true)
+  saldoInicial: yup.number().required('Saldo inicial é obrigatório').min(0, 'Saldo inicial deve ser positivo'),
+  ativa: yup.boolean().required('Status ativo é obrigatório')
 }).required();
 
 type FormData = yup.InferType<typeof schema>;
@@ -25,28 +23,30 @@ export default function ContaForm() {
   const { empresaId, contaId } = useParams<{ empresaId: string; contaId?: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const isEdit = !!contaId;
+  const isEdit = !!(contaId && contaId !== 'novo');
 
   const {
     register,
     handleSubmit,
     reset,
-    watch,
     formState: { errors }
   } = useForm<FormData>({
     resolver: yupResolver(schema),
     defaultValues: {
       tipo: 'BANCO',
-      saldo: 0,
-      ativo: true
+      saldoInicial: 0,
+      ativa: true
     }
   });
 
-  const tipoValue = watch('tipo');
 
   useEffect(() => {
-    if (isEdit && empresaId && contaId) {
+    console.log('ContaForm useEffect:', { isEdit, empresaId, contaId, contaIdType: typeof contaId });
+    if (isEdit && empresaId && contaId && contaId !== 'novo') {
+      console.log('Loading conta with ID:', contaId);
       loadConta();
+    } else {
+      console.log('NOT loading conta - creating new or invalid conditions');
     }
   }, [isEdit, empresaId, contaId]);
 
@@ -57,10 +57,8 @@ export default function ContaForm() {
       reset({
         tipo: conta.tipo,
         nome: conta.nome,
-        socioId: conta.socioId,
-        bancoId: conta.bancoId,
-        saldo: conta.saldo,
-        ativo: conta.ativo
+        saldoInicial: conta.saldoInicial,
+        ativa: conta.ativa
       });
     } catch (error) {
       console.error('Error loading conta:', error);
@@ -140,62 +138,28 @@ export default function ContaForm() {
             )}
           </div>
 
-          {tipoValue === 'SOCIO' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                ID do Sócio
-              </label>
-              <input
-                type="number"
-                {...register('socioId')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                disabled={loading}
-                placeholder="Informe o ID do sócio (opcional)"
-              />
-              {errors.socioId && (
-                <p className="text-red-500 text-sm mt-1">{errors.socioId.message}</p>
-              )}
-            </div>
-          )}
 
-          {tipoValue === 'BANCO' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                ID do Banco
-              </label>
-              <input
-                type="number"
-                {...register('bancoId')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                disabled={loading}
-                placeholder="Informe o ID do banco (opcional)"
-              />
-              {errors.bancoId && (
-                <p className="text-red-500 text-sm mt-1">{errors.bancoId.message}</p>
-              )}
-            </div>
-          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Saldo Inicial
+              Saldo Inicial *
             </label>
             <input
               type="number"
               step="0.01"
-              {...register('saldo')}
+              {...register('saldoInicial')}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={loading}
             />
-            {errors.saldo && (
-              <p className="text-red-500 text-sm mt-1">{errors.saldo.message}</p>
+            {errors.saldoInicial && (
+              <p className="text-red-500 text-sm mt-1">{errors.saldoInicial.message}</p>
             )}
           </div>
 
           <div className="flex items-center">
             <input
               type="checkbox"
-              {...register('ativo')}
+              {...register('ativa')}
               className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
               disabled={loading}
             />

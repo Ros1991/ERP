@@ -1,24 +1,24 @@
 export const API_CONFIG = {
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
   endpoints: {
     auth: {
-      login: '/api/auth/login',
-      register: '/api/auth/register',
-      logout: '/api/auth/logout',
-      forgotPassword: '/api/auth/forgot-password',
-      resetPassword: '/api/auth/reset-password',
-      profile: '/api/auth/profile',
-      validate: '/api/auth/validate',
+      login: '/auth/login',
+      register: '/auth/register',
+      logout: '/auth/logout',
+      forgotPassword: '/auth/forgot-password',
+      resetPassword: '/auth/reset-password',
+      profile: '/auth/profile',
+      validate: '/auth/validate',
     },
-    empresas: '/api/empresas',
-    funcionarios: '/api/funcionarios',
-    tarefas: '/api/tarefas',
-    financeiro: '/api/transacao-financeiras',
-    compras: '/api/pedido-compras',
+    empresas: '/empresas',
+    funcionarios: '/funcionarios',
+    tarefas: '/tarefas',
+    financeiro: '/transacao-financeiras',
+    compras: '/pedido-compras',
   },
 };
 

@@ -102,7 +102,7 @@ export default function ContaList() {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">Contas</h1>
         <button
-          onClick={() => navigate(`/empresas/${empresaId}/contas/novo`)}
+          onClick={() => navigate(`/empresas/${empresaId}/contas/nova`)}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
           <Plus className="h-5 w-5" />
@@ -152,15 +152,15 @@ export default function ContaList() {
                       <div className="text-sm font-medium text-gray-900">{conta.nome}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className={`text-sm font-medium ${conta.saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatCurrency(conta.saldo)}
+                      <div className={`text-sm font-medium ${conta.saldoInicial >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {formatCurrency(conta.saldoInicial)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 text-xs leading-5 font-semibold rounded-full ${
-                        conta.ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        conta.ativa ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}>
-                        {conta.ativo ? 'Ativa' : 'Inativa'}
+                        {conta.ativa ? 'Ativa' : 'Inativa'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
