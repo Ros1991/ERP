@@ -25,6 +25,16 @@ import CentroCustoList from './pages/financeiro/centros-custo/CentroCustoList';
 import CentroCustoForm from './pages/financeiro/centros-custo/CentroCustoForm';
 import CentroCustoView from './pages/financeiro/centros-custo/CentroCustoView';
 
+// Placeholder components for modules under development
+const PlaceholderPage = ({ title }: { title: string }) => (
+  <div className="flex items-center justify-center h-64">
+    <div className="text-center">
+      <h2 className="text-2xl font-bold text-gray-600 mb-2">{title}</h2>
+      <p className="text-gray-500">Em desenvolvimento</p>
+    </div>
+  </div>
+);
+
 // Layout & Auth
 import { Layout } from './components/layout/Layout';
 import { PrivateRoute } from './components/auth/PrivateRoute';
@@ -100,15 +110,7 @@ function App() {
               <Route path=":centroCustoId" element={<CentroCustoView />} />
               <Route path=":centroCustoId/editar" element={<CentroCustoForm />} />
             </Route>
-            
-            {/* Placeholder routes for other modules */}
-            <Route path="funcionarios" element={<div>Funcionários - Em desenvolvimento</div>} />
-            <Route path="contratos" element={<div>Contratos - Em desenvolvimento</div>} />
-            <Route path="beneficios-descontos" element={<div>Benefícios/Descontos - Em desenvolvimento</div>} />
-            <Route path="tarefas" element={<div>Tarefas - Em desenvolvimento</div>} />
-            <Route path="tipos-tarefa" element={<div>Tipos de Tarefa - Em desenvolvimento</div>} />
-            <Route path="status-tarefas" element={<div>Status de Tarefas - Em desenvolvimento</div>} />
-            <Route path="pedidos-compra" element={<div>Pedidos de Compra - Em desenvolvimento</div>} />
+
           </Route>
 
           {/* Empresas Management Routes - Admin Only */}
