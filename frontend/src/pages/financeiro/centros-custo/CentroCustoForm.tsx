@@ -8,13 +8,11 @@ import toast from 'react-hot-toast';
 import centroCustoService from '../../../services/financeiro/centroCusto.service';
 import type { CreateCentroCustoDTO, UpdateCentroCustoDTO } from '../../../models/financeiro/CentroCusto.model';
 
-const schema = yup.object({
+const schema = yup.object().shape({
   nome: yup.string().required('Nome é obrigatório'),
-  descricao: yup.string(),
-  ativo: yup.boolean()
+  descricao: yup.string().notRequired(),
+  ativo: yup.boolean().default(true)
 });
-
-type FormData = yup.InferType<typeof schema>;
 
 export default function CentroCustoForm() {
   const { empresaId, centroCustoId } = useParams<{ empresaId: string; centroCustoId?: string }>();
@@ -27,7 +25,7 @@ export default function CentroCustoForm() {
     handleSubmit,
     formState: { errors },
     reset
-  } = useForm<FormData>({
+  } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
       nome: '',
@@ -48,7 +46,7 @@ export default function CentroCustoForm() {
       const data = await centroCustoService.getById(Number(empresaId), Number(centroCustoId));
       reset({
         nome: data.nome,
-        descricao: data.descricao || '',
+        descricao: data.descricao || undefined,
         ativo: data.ativo
       });
     } catch (error) {
@@ -60,25 +58,29 @@ export default function CentroCustoForm() {
     }
   };
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: any) => {
     try {
       setLoading(true);
+      
+      console.log('Form data before processing:', data);
       
       if (isEdit) {
         const updateData: UpdateCentroCustoDTO = {
           nome: data.nome,
-          descricao: data.descricao || undefined,
-          ativo: data.ativo
+          descricao: data.descricao || null,
+          ativo: data.ativo ?? true
         };
+        console.log('Update data being sent:', updateData);
         await centroCustoService.update(Number(empresaId), Number(centroCustoId), updateData);
         toast.success('Centro de custo atualizado com sucesso');
       } else {
         const createData: CreateCentroCustoDTO = {
           empresaId: Number(empresaId),
           nome: data.nome,
-          descricao: data.descricao || undefined,
-          ativo: data.ativo
+          descricao: data.descricao || null,
+          ativo: data.ativo ?? true
         };
+        console.log('Create data being sent:', createData);
         await centroCustoService.create(Number(empresaId), createData);
         toast.success('Centro de custo criado com sucesso');
       }

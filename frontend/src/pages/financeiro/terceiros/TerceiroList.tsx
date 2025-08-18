@@ -78,14 +78,22 @@ export default function TerceiroList() {
     }
   };
 
-  const formatDocument = (doc: string, tipo: string) => {
-    if (tipo === 'FISICA') {
+  const formatDocument = (doc?: string) => {
+    if (!doc) return '-';
+    
+    // Remove non-numeric characters
+    const numbers = doc.replace(/\D/g, '');
+    
+    if (numbers.length === 11) {
       // Format CPF: 000.000.000-00
-      return doc.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-    } else {
+      return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    } else if (numbers.length === 14) {
       // Format CNPJ: 00.000.000/0000-00
-      return doc.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+      return numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
     }
+    
+    // Return as is if doesn't match CPF or CNPJ format
+    return doc;
   };
 
   const totalPages = Math.ceil(pagination.total / pagination.limit);
@@ -146,9 +154,6 @@ export default function TerceiroList() {
                   <tr key={terceiro.terceiroId}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">{terceiro.nome}</div>
-                      <div className="text-sm text-gray-500">
-                        {terceiro.tipoPessoa === 'FISICA' ? 'Pessoa Física' : 'Pessoa Jurídica'}
-                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getTipoColor(terceiro.tipo)}`}>
@@ -158,7 +163,7 @@ export default function TerceiroList() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {formatDocument(terceiro.documento, terceiro.tipoPessoa)}
+                        {formatDocument(terceiro.cnpjCpf)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

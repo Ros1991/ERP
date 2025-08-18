@@ -10,26 +10,34 @@ export interface PaginatedResponse<T> {
 
 class TerceiroService {
   async getAll(empresaId: number, page = 1, limit = 10): Promise<PaginatedResponse<Terceiro>> {
-    const response = await api.get<PaginatedResponse<Terceiro>>(
+    const response = await api.get(
       `/empresas/${empresaId}/terceiros`,
       { params: { page, limit } }
     );
-    return response.data;
+    
+    // Map backend response structure to frontend expected structure
+    const backendData = response.data.data; // Nested data from backend
+    return {
+      data: backendData.items,
+      total: backendData.pagination.total,
+      page: backendData.pagination.page,
+      limit: backendData.pagination.limit
+    };
   }
 
   async getById(empresaId: number, terceiroId: number): Promise<Terceiro> {
-    const response = await api.get<Terceiro>(`/empresas/${empresaId}/terceiros/${terceiroId}`);
-    return response.data;
+    const response = await api.get(`/empresas/${empresaId}/terceiros/${terceiroId}`);
+    return response.data.data; // Extract data from backend response
   }
 
   async create(empresaId: number, dto: CreateTerceiroDTO): Promise<Terceiro> {
-    const response = await api.post<Terceiro>(`/empresas/${empresaId}/terceiros`, dto);
-    return response.data;
+    const response = await api.post(`/empresas/${empresaId}/terceiros`, dto);
+    return response.data.data; // Extract data from backend response
   }
 
   async update(empresaId: number, terceiroId: number, dto: UpdateTerceiroDTO): Promise<Terceiro> {
-    const response = await api.put<Terceiro>(`/empresas/${empresaId}/terceiros/${terceiroId}`, dto);
-    return response.data;
+    const response = await api.put(`/empresas/${empresaId}/terceiros/${terceiroId}`, dto);
+    return response.data.data; // Extract data from backend response
   }
 
   async delete(empresaId: number, terceiroId: number): Promise<void> {

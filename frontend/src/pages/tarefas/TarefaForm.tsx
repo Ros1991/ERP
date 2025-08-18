@@ -153,7 +153,7 @@ export default function TarefaForm() {
               </label>
               <select
                 {...register('tipoId')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="select"
                 disabled={loading}
               >
                 <option value="">Selecione um tipo</option>
@@ -171,7 +171,7 @@ export default function TarefaForm() {
               </label>
               <select
                 {...register('status')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="select"
                 disabled={loading}
               >
                 <option value="PENDENTE">Pendente</option>
@@ -189,7 +189,7 @@ export default function TarefaForm() {
               </label>
               <select
                 {...register('prioridade')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="select"
                 disabled={loading}
               >
                 <option value="BAIXA">Baixa</option>

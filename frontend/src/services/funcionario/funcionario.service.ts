@@ -9,34 +9,43 @@ class FuncionarioService {
   }
 
   async getAll(empresaId: number | string, params?: QueryParams): Promise<PaginatedResponse<Funcionario>> {
-    const response = await api.get<PaginatedResponse<Funcionario>>(
+    const response = await api.get(
       this.getEndpoint(empresaId),
       { params }
     );
-    return response.data;
+    
+    // Map backend response structure to frontend expected structure
+    const backendData = response.data.data; // Nested data from backend
+    return {
+      data: backendData.items,
+      total: backendData.pagination.total,
+      page: backendData.pagination.page,
+      pageSize: backendData.pagination.limit,
+      totalPages: Math.ceil(backendData.pagination.total / backendData.pagination.limit)
+    };
   }
 
   async getById(empresaId: number | string, id: string): Promise<Funcionario> {
-    const response = await api.get<Funcionario>(
+    const response = await api.get(
       `${this.getEndpoint(empresaId)}/${id}`
     );
-    return response.data;
+    return response.data.data; // Extract data from backend response
   }
 
   async create(empresaId: number | string, data: CreateFuncionarioDTO): Promise<Funcionario> {
-    const response = await api.post<Funcionario>(
+    const response = await api.post(
       this.getEndpoint(empresaId),
-      { ...data, empresaId: Number(empresaId) }
+      data
     );
-    return response.data;
+    return response.data.data; // Extract data from backend response
   }
 
   async update(empresaId: number | string, id: string, data: UpdateFuncionarioDTO): Promise<Funcionario> {
-    const response = await api.put<Funcionario>(
+    const response = await api.put(
       `${this.getEndpoint(empresaId)}/${id}`,
       data
     );
-    return response.data;
+    return response.data.data; // Extract data from backend response
   }
 
   async delete(empresaId: number | string, id: string): Promise<void> {

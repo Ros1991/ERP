@@ -11,25 +11,35 @@ export interface PaginatedResponse<T> {
 
 class TarefaService {
   async getAll(empresaId: number, page = 1, limit = 10): Promise<PaginatedResponse<Tarefa>> {
-    const response = await api.get<PaginatedResponse<Tarefa>>(
-      `/empresas/${empresaId}/tarefas?page=${page}&limit=${limit}`
+    const response = await api.get(
+      `/empresas/${empresaId}/tarefas`,
+      { params: { page, limit } }
     );
-    return response.data;
+    
+    // Map backend response structure to frontend expected structure
+    const backendData = response.data.data; // Nested data from backend
+    return {
+      data: backendData.items,
+      total: backendData.pagination.total,
+      page: backendData.pagination.page,
+      limit: backendData.pagination.limit,
+      totalPages: Math.ceil(backendData.pagination.total / backendData.pagination.limit)
+    };
   }
 
   async getById(empresaId: number, tarefaId: number): Promise<Tarefa> {
-    const response = await api.get<Tarefa>(`/empresas/${empresaId}/tarefas/${tarefaId}`);
-    return response.data;
+    const response = await api.get(`/empresas/${empresaId}/tarefas/${tarefaId}`);
+    return response.data.data; // Extract data from backend response
   }
 
   async create(empresaId: number, dto: CreateTarefaDTO): Promise<Tarefa> {
-    const response = await api.post<Tarefa>(`/empresas/${empresaId}/tarefas`, dto);
-    return response.data;
+    const response = await api.post(`/empresas/${empresaId}/tarefas`, dto);
+    return response.data.data; // Extract data from backend response
   }
 
   async update(empresaId: number, tarefaId: number, dto: UpdateTarefaDTO): Promise<Tarefa> {
-    const response = await api.put<Tarefa>(`/empresas/${empresaId}/tarefas/${tarefaId}`, dto);
-    return response.data;
+    const response = await api.put(`/empresas/${empresaId}/tarefas/${tarefaId}`, dto);
+    return response.data.data; // Extract data from backend response
   }
 
   async delete(empresaId: number, tarefaId: number): Promise<void> {
@@ -41,11 +51,11 @@ class TarefaService {
     tarefaId: number, 
     status: 'PENDENTE' | 'EM_ANDAMENTO' | 'PAUSADA' | 'PARADA' | 'CONCLUIDA' | 'CANCELADA'
   ): Promise<Tarefa> {
-    const response = await api.patch<Tarefa>(
+    const response = await api.patch(
       `/empresas/${empresaId}/tarefas/${tarefaId}/status`,
       { status }
     );
-    return response.data;
+    return response.data.data; // Extract data from backend response
   }
 }
 

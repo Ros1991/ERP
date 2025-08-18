@@ -31,8 +31,9 @@ export class CreateTerceiroDto implements IDto {
   @Length(1, 20)
   telefone?: string;
 
-  @IsNotEmpty()
-  email!: string;
+  @IsOptional()
+  @IsEmail()
+  email?: string;
 
   @IsNotEmpty()
   @IsBoolean()

@@ -10,39 +10,38 @@ interface PaginatedResponse {
 
 class CentroCustoService {
   async getAll(empresaId: number, page: number = 1, limit: number = 10): Promise<PaginatedResponse> {
-    const response = await api.get<PaginatedResponse>(`/centro-custos`, {
-      params: { empresaId, page, limit }
-    });
-    return response.data;
+    const response = await api.get(
+      `/empresas/${empresaId}/centro-custos`,
+      { params: { page, limit } }
+    );
+    
+    // Map backend response structure to frontend expected structure
+    const backendData = response.data.data; // Nested data from backend
+    return {
+      data: backendData.items,
+      total: backendData.pagination.total,
+      page: backendData.pagination.page,
+      limit: backendData.pagination.limit
+    };
   }
 
   async getById(empresaId: number, centroCustoId: number): Promise<CentroCusto> {
-    const response = await api.get<CentroCusto>(`/centro-custos/${centroCustoId}`, {
-      params: { empresaId }
-    });
-    return response.data;
+    const response = await api.get(`/empresas/${empresaId}/centro-custos/${centroCustoId}`);
+    return response.data.data; // Extract data from backend response
   }
 
   async create(empresaId: number, data: CreateCentroCustoDTO): Promise<CentroCusto> {
-    const response = await api.post<CentroCusto>('/centro-custos', {
-      ...data,
-      empresaId
-    });
-    return response.data;
+    const response = await api.post(`/empresas/${empresaId}/centro-custos`, data);
+    return response.data.data; // Extract data from backend response
   }
 
   async update(empresaId: number, centroCustoId: number, data: UpdateCentroCustoDTO): Promise<CentroCusto> {
-    const response = await api.put<CentroCusto>(`/centro-custos/${centroCustoId}`, {
-      ...data,
-      empresaId
-    });
-    return response.data;
+    const response = await api.put(`/empresas/${empresaId}/centro-custos/${centroCustoId}`, data);
+    return response.data.data; // Extract data from backend response
   }
 
   async delete(empresaId: number, centroCustoId: number): Promise<void> {
-    await api.delete(`/centro-custos/${centroCustoId}`, {
-      params: { empresaId }
-    });
+    await api.delete(`/empresas/${empresaId}/centro-custos/${centroCustoId}`);
   }
 }
 

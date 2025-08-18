@@ -32,7 +32,7 @@ import emprestimoRoutes from '@/routes/emprestimoRoutes';
 import pedidocompraRoutes from '@/routes/pedidocompraRoutes';
 
 // Import middleware
-import { checkEmpresaPermission } from '@/middlewares/checkEmpresaPermission';
+import { checkEmpresaPermission } from '@/middleware/checkEmpresaPermission';
 import { authenticate } from '@/middleware/authMiddleware';
 
 // Load environment variables

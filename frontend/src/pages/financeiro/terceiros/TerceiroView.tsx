@@ -49,13 +49,20 @@ export default function TerceiroView() {
     }
   };
 
-  const formatDocument = (doc: string, tipo: string) => {
-    if (tipo === 'FISICA') {
+  const formatDocument = (doc?: string) => {
+    if (!doc) return '-';
+    
+    // Remove non-numeric characters
+    const cleanDoc = doc.replace(/\D/g, '');
+    
+    if (cleanDoc.length === 11) {
       // Format CPF: 000.000.000-00
-      return doc.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-    } else {
+      return cleanDoc.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    } else if (cleanDoc.length === 14) {
       // Format CNPJ: 00.000.000/0000-00
-      return doc.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+      return cleanDoc.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+    } else {
+      return doc; // Return original if can't format
     }
   };
 
@@ -114,10 +121,8 @@ export default function TerceiroView() {
                 {getTipoIcon(terceiro.tipo)}
                 {terceiro.tipo}
               </span>
-              <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
-                terceiro.tipoPessoa === 'FISICA' ? 'bg-indigo-100 text-indigo-800' : 'bg-teal-100 text-teal-800'
-              }`}>
-                {terceiro.tipoPessoa === 'FISICA' ? 'Pessoa Física' : 'Pessoa Jurídica'}
+              <span className="inline-flex px-3 py-1 text-sm font-semibold rounded-full bg-indigo-100 text-indigo-800">
+                ID: {terceiro.terceiroId}
               </span>
               <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
                 terceiro.ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
@@ -135,11 +140,9 @@ export default function TerceiroView() {
             </div>
 
             <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">
-                {terceiro.tipoPessoa === 'FISICA' ? 'CPF' : 'CNPJ'}
-              </h3>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">CPF/CNPJ</h3>
               <p className="text-lg font-mono text-gray-900">
-                {formatDocument(terceiro.documento, terceiro.tipoPessoa)}
+                {formatDocument(terceiro.cnpjCpf)}
               </p>
             </div>
           </div>
@@ -182,13 +185,7 @@ export default function TerceiroView() {
             </div>
           )}
 
-          {/* Observações */}
-          {terceiro.observacao && (
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Observações</h3>
-              <p className="text-gray-700 whitespace-pre-wrap">{terceiro.observacao}</p>
-            </div>
-          )}
+          {/* Informações adicionais podem ser adicionadas aqui no futuro */}
 
           {/* Informações de auditoria */}
           <div className="border-t pt-6">
