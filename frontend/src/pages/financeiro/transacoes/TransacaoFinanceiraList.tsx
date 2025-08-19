@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Plus, Eye, Edit, Trash2, TrendingUp, TrendingDown, DollarSign, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Eye, Edit, Trash2, TrendingUp, TrendingDown, DollarSign, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
 import transacaoFinanceiraService from '../../../services/financeiro/transacaoFinanceira.service';
 import type { TransacaoFinanceira } from '../../../models/financeiro/TransacaoFinanceira.model';
@@ -11,21 +11,36 @@ export default function TransacaoFinanceiraList() {
   const navigate = useNavigate();
   const [transacoes, setTransacoes] = useState<TransacaoFinanceira[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 10;
   const { ConfirmDialog, showConfirm } = useConfirmDialog();
 
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // Reset page when search changes
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
+
   useEffect(() => {
     if (empresaId) {
       loadTransacoes();
     }
-  }, [empresaId, page]);
+  }, [empresaId, page, debouncedSearch]);
 
   const loadTransacoes = async () => {
     try {
       setLoading(true);
-      const response = await transacaoFinanceiraService.getAll(Number(empresaId), page, limit);
+      const response = await transacaoFinanceiraService.getAll(Number(empresaId), page, limit, debouncedSearch || undefined);
       setTransacoes(response.data);
       setTotalPages(Math.ceil(response.total / limit));
     } catch (error) {
@@ -44,7 +59,7 @@ export default function TransacaoFinanceiraList() {
       onConfirm: async () => {
         try {
           setLoading(true);
-          await transacaoFinanceiraService.delete(Number(empresaId), transacao.transacaoFinanceiraId);
+          await transacaoFinanceiraService.delete(Number(empresaId), transacao.transacaoId);
           toast.success('Transação financeira excluída com sucesso');
           loadTransacoes();
         } catch (error) {
@@ -88,8 +103,11 @@ export default function TransacaoFinanceiraList() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Transações Financeiras</h1>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Transações Financeiras</h1>
+          <p className="text-gray-600">Gerencie receitas e despesas da empresa</p>
+        </div>
         <button
           onClick={() => navigate(`/empresas/${empresaId}/transacoes-financeiras/nova`)}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -97,6 +115,19 @@ export default function TransacaoFinanceiraList() {
           <Plus className="h-5 w-5" />
           Nova Transação
         </button>
+      </div>
+
+      <div className="bg-white rounded-lg shadow p-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+          <input
+            type="text"
+            placeholder="Buscar transações..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -122,7 +153,7 @@ export default function TransacaoFinanceiraList() {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {transacoes.map((transacao) => (
-              <tr key={transacao.transacaoFinanceiraId} className="hover:bg-gray-50">
+              <tr key={transacao.transacaoId} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-2">
                     {getTipoIcon(transacao.tipo)}
@@ -132,12 +163,12 @@ export default function TransacaoFinanceiraList() {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {formatDate(transacao.data)}
+                  {formatDate(transacao.dataTransacao)}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-900">
                   <div className="max-w-xs truncate">{transacao.descricao}</div>
-                  {transacao.observacao && (
-                    <div className="text-xs text-gray-500 truncate">{transacao.observacao}</div>
+                  {transacao.observacoes && (
+                    <div className="text-xs text-gray-500 truncate">{transacao.observacoes}</div>
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -151,25 +182,25 @@ export default function TransacaoFinanceiraList() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex gap-2">
                     <button
-                      onClick={() => navigate(`/empresas/${empresaId}/transacoes-financeiras/${transacao.transacaoFinanceiraId}`)}
-                      className="text-blue-600 hover:text-blue-900"
+                      onClick={() => navigate(`/empresas/${empresaId}/transacoes-financeiras/${transacao.transacaoId}`)}
+                      className="p-1 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded"
                       title="Visualizar"
                     >
-                      <Eye className="h-5 w-5" />
+                      <Eye className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => navigate(`/empresas/${empresaId}/transacoes-financeiras/${transacao.transacaoFinanceiraId}/editar`)}
-                      className="text-yellow-600 hover:text-yellow-900"
+                      onClick={() => navigate(`/empresas/${empresaId}/transacoes-financeiras/${transacao.transacaoId}/editar`)}
+                      className="p-1 text-yellow-600 hover:text-yellow-900 hover:bg-yellow-50 rounded"
                       title="Editar"
                     >
-                      <Edit className="h-5 w-5" />
+                      <Edit className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => deleteTransacao(transacao)}
-                      className="text-red-600 hover:text-red-900"
+                      className="p-1 text-red-600 hover:text-red-900 hover:bg-red-50 rounded"
                       title="Excluir"
                     >
-                      <Trash2 className="h-5 w-5" />
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 </td>

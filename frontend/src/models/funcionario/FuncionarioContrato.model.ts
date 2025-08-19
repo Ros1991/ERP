@@ -1,29 +1,32 @@
 export interface FuncionarioContrato {
-  id: number;
+  contratoId: number;
   funcionarioId: number;
-  empresaId: number;
-  tipoContrato: 'CLT' | 'PJ' | 'ESTAGIO' | 'TEMPORARIO' | 'TERCEIRIZADO';
+  tipoContrato: 'CLT' | 'PJ' | 'ESTAGIARIO' | 'TERCEIRIZADO';
+  tipoPagamento: 'HORISTA' | 'DIARISTA' | 'MENSALISTA';
+  formaPagamento?: string;
+  salario: number;
+  cargaHorariaSemanal?: number;
   dataInicio: string;
   dataFim?: string;
-  salarioBase: number;
-  cargaHoraria: number;
+  ativo: boolean;
   observacoes?: string;
-  isActive: boolean;
+  isDeleted: boolean;
+  deletedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateFuncionarioContratoDTO {
   funcionarioId: number;
-  empresaId: number;
-  tipoContrato: 'CLT' | 'PJ' | 'ESTAGIO' | 'TEMPORARIO' | 'TERCEIRIZADO';
+  tipoContrato: 'CLT' | 'PJ' | 'ESTAGIARIO' | 'TERCEIRIZADO';
+  tipoPagamento: 'HORISTA' | 'DIARISTA' | 'MENSALISTA';
+  formaPagamento?: string;
+  salario: number;
+  cargaHorariaSemanal?: number;
   dataInicio: string;
   dataFim?: string;
-  salarioBase: number;
-  cargaHoraria: number;
+  ativo?: boolean;
   observacoes?: string;
 }
 
-export interface UpdateFuncionarioContratoDTO extends Partial<CreateFuncionarioContratoDTO> {
-  isActive?: boolean;
-}
+export interface UpdateFuncionarioContratoDTO extends Partial<CreateFuncionarioContratoDTO> {}

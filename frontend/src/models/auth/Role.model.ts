@@ -1,12 +1,13 @@
 export interface Role {
-  id: number;
+  roleId: number;
   empresaId: number;
   nome: string;
-  descricao?: string;
-  permissions: string[];
-  isActive: boolean;
+  permissoes?: any;
+  ativo: boolean;
   createdAt: string;
   updatedAt: string;
+  deletedAt?: string | null;
+  isDeleted: boolean;
 }
 
 export interface Permission {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Edit, TrendingUp, TrendingDown, Calendar, DollarSign, Clock, FileText, Building, User } from 'lucide-react';
+import { ArrowLeft, Edit, TrendingUp, TrendingDown, Calendar, Clock, FileText, Building, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 import transacaoFinanceiraService from '../../../services/financeiro/transacaoFinanceira.service';
 import contaService from '../../../services/financeiro/conta.service';
@@ -115,7 +115,7 @@ export default function TransacaoFinanceiraView() {
             Voltar
           </button>
           <button
-            onClick={() => navigate(`/empresas/${empresaId}/transacoes-financeiras/${transacaoFinanceiraId}/editar`)}
+            onClick={() => navigate(`/empresas/${empresaId}/transacoes-financeiras/${transacao.transacaoId}/editar`)}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             <Edit className="h-5 w-5" />
@@ -155,11 +155,11 @@ export default function TransacaoFinanceiraView() {
                   <div>
                     <p className="text-lg font-semibold text-gray-900">{conta.nome}</p>
                     <p className="text-sm text-gray-600">{conta.tipo}</p>
-                    {conta.bancoId && <p className="text-sm text-gray-600">{conta.bancoId}</p>}
+                    <p className="text-sm text-gray-600">Saldo Inicial: {formatCurrency(conta.saldoInicial)}</p>
                   </div>
                 </div>
               ) : (
-                <p className="text-lg text-gray-900">ID: {transacao.contaId}</p>
+                <p className="text-lg text-gray-900">{formatDate(transacao.dataTransacao)}</p>
               )}
             </div>
 
@@ -172,7 +172,7 @@ export default function TransacaoFinanceiraView() {
                   <User className="h-5 w-5 text-gray-400" />
                   <div>
                     <p className="text-lg font-semibold text-gray-900">{terceiro.nome}</p>
-                    <p className="text-sm text-gray-600">{terceiro.documento}</p>
+                    <p className="text-sm text-gray-600">{terceiro.cnpjCpf}</p>
                     {terceiro.email && <p className="text-sm text-gray-600">{terceiro.email}</p>}
                   </div>
                 </div>
@@ -185,19 +185,19 @@ export default function TransacaoFinanceiraView() {
             <Calendar className="h-5 w-5 text-gray-400" />
             <div>
               <span className="text-sm text-gray-500">Data da Transação:</span>
-              <p className="text-gray-900 font-medium">{formatDate(transacao.data)}</p>
+              <p className="text-gray-900 font-medium">{formatDate(transacao.dataTransacao)}</p>
             </div>
           </div>
 
           {/* Observações */}
-          {transacao.observacao && (
+          {transacao.observacoes && (
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <FileText className="h-5 w-5 text-gray-400" />
                 <h3 className="text-lg font-medium text-gray-900">Observações</h3>
               </div>
               <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-gray-700 whitespace-pre-wrap">{transacao.observacao}</p>
+                <p className="text-gray-700 whitespace-pre-wrap">{transacao.observacoes}</p>
               </div>
             </div>
           )}

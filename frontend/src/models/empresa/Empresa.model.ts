@@ -4,12 +4,8 @@ export interface Empresa {
   cnpj?: string;
   razaoSocial?: string;
   ativa: boolean;
-  email?: string;
-  telefone?: string;
-  endereco?: string;
-  cidade?: string;
-  estado?: string;
-  cep?: string;
+  isDeleted: boolean;
+  deletedAt?: string;
   createdAt: string;
   updatedAt: string;
 }

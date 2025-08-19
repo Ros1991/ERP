@@ -1,14 +1,25 @@
 import api from '../../lib/axios';
 import { API_CONFIG } from '../../config/api.config';
 import type { Funcionario, CreateFuncionarioDTO, UpdateFuncionarioDTO } from '../../models/funcionario/Funcionario.model';
-import type { PaginatedResponse, QueryParams } from '../../types/common.types';
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+}
 
 class FuncionarioService {
   private getEndpoint(empresaId: number | string) {
     return `${API_CONFIG.endpoints.empresas}/${empresaId}/funcionarios`;
   }
 
-  async getAll(empresaId: number | string, params?: QueryParams): Promise<PaginatedResponse<Funcionario>> {
+  async getAll(empresaId: number | string, page = 1, limit = 10, search?: string): Promise<PaginatedResponse<Funcionario>> {
+    const params: any = { page, limit };
+    if (search && search.trim()) {
+      params.search = search.trim();
+    }
+    
     const response = await api.get(
       this.getEndpoint(empresaId),
       { params }
@@ -20,8 +31,7 @@ class FuncionarioService {
       data: backendData.items,
       total: backendData.pagination.total,
       page: backendData.pagination.page,
-      pageSize: backendData.pagination.limit,
-      totalPages: Math.ceil(backendData.pagination.total / backendData.pagination.limit)
+      limit: backendData.pagination.limit
     };
   }
 

@@ -1,12 +1,14 @@
 export interface User {
-  id: string;
-  nome: string;
+  userId: number;
   email: string;
-  avatar?: string;
-  empresaId?: string;
-  roles?: string[];
+  nome: string;
+  passwordHash: string;
+  resetTokenHash?: string;
+  resetTokenExpires?: string;
   createdAt: string;
   updatedAt: string;
+  deletedAt?: string | null;
+  isDeleted: boolean;
 }
 
 export interface UserCredentials {

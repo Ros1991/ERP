@@ -2,14 +2,11 @@ import type { Empresa } from "./Empresa.model";
 import type { Role } from "../auth/Role.model";
 
 export interface UsuarioEmpresa {
-  id: number;
+  usuarioEmpresaId: number;
   userId: number;
   empresaId: number;
-  cargo?: string;
-  departamento?: string;
-  dataAdmissao?: string;
-  isAdmin: boolean;
-  isActive: boolean;
+  roleId?: number;
+  ativo: boolean;
   createdAt: string;
   updatedAt: string;
 
@@ -20,16 +17,11 @@ export interface UsuarioEmpresa {
 export interface CreateUsuarioEmpresaDTO {
   userId: number;
   empresaId: number;
-  cargo?: string;
-  departamento?: string;
-  dataAdmissao?: string;
-  isAdmin?: boolean;
+  roleId?: number;
+  ativo?: boolean;
 }
 
 export interface UpdateUsuarioEmpresaDTO {
-  cargo?: string;
-  departamento?: string;
-  dataAdmissao?: string;
-  isAdmin?: boolean;
-  isActive?: boolean;
+  roleId?: number;
+  ativo?: boolean;
 }

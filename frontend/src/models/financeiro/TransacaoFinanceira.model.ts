@@ -1,13 +1,15 @@
 export interface TransacaoFinanceira {
-  transacaoFinanceiraId: number;
+  transacaoId: number;
   empresaId: number;
   contaId: number;
   terceiroId?: number;
   tipo: 'RECEITA' | 'DESPESA';
   descricao: string;
   valor: number;
-  data: string;
-  observacao?: string;
+  dataTransacao: string;
+  dataVencimento?: string;
+  status: 'PENDENTE' | 'PAGO' | 'CANCELADO';
+  observacoes?: string;
   isDeleted: boolean;
   deletedAt?: string;
   createdAt: string;
@@ -21,8 +23,10 @@ export interface CreateTransacaoFinanceiraDTO {
   tipo: 'RECEITA' | 'DESPESA';
   descricao: string;
   valor: number;
-  data: string;
-  observacao?: string;
+  dataTransacao: string;
+  dataVencimento?: string;
+  status?: 'PENDENTE' | 'PAGO' | 'CANCELADO';
+  observacoes?: string;
 }
 
 export interface UpdateTransacaoFinanceiraDTO extends Partial<CreateTransacaoFinanceiraDTO> {}

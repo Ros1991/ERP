@@ -9,10 +9,15 @@ export interface PaginatedResponse<T> {
 }
 
 class PedidoCompraService {
-  async getAll(empresaId: number, page = 1, limit = 10): Promise<PaginatedResponse<PedidoCompra>> {
+  async getAll(empresaId: number, page = 1, limit = 10, search?: string): Promise<PaginatedResponse<PedidoCompra>> {
+    const params: any = { page, limit };
+    if (search && search.trim()) {
+      params.search = search.trim();
+    }
+    
     const response = await api.get(
       `/empresas/${empresaId}/pedido-compras`,
-      { params: { page, limit } }
+      { params }
     );
     
     // Map backend response structure to frontend expected structure

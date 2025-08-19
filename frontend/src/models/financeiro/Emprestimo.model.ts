@@ -1,15 +1,18 @@
+import type { Funcionario } from "../funcionario";
+
 export interface Emprestimo {
-  id: number;
+  emprestimoId: number;
   empresaId: number;
   funcionarioId: number;
-  valor: number;
-  taxaJuros?: number;
-  numeroParcelas: number;
-  valorParcela: number;
+  funcionario: Funcionario;
+  valorTotal: number;
+  valorPago: number;
+  valorPendente: number;
+  totalParcelas: number;
+  parcelasPagas: number;
+  quandoCobrar: 'MENSAL' | 'FERIAS' | '13_SALARIO' | 'TUDO';
   dataEmprestimo: string;
-  dataPrimeiraParcela: string;
-  dataUltimaParcela?: string;
-  motivoEmprestimo?: string;
+  dataInicioCobranca: string;
   status: 'ATIVO' | 'QUITADO' | 'CANCELADO';
   observacoes?: string;
   createdAt: string;
@@ -19,17 +22,17 @@ export interface Emprestimo {
 export interface CreateEmprestimoDTO {
   empresaId: number;
   funcionarioId: number;
-  valor: number;
-  taxaJuros?: number;
-  numeroParcelas: number;
+  valorTotal: number;
+  totalParcelas: number;
+  quandoCobrar: 'MENSAL' | 'FERIAS' | '13_SALARIO' | 'TUDO';
   dataEmprestimo: string;
-  dataPrimeiraParcela: string;
-  motivoEmprestimo?: string;
+  dataInicioCobranca: string;
   observacoes?: string;
 }
 
 export interface UpdateEmprestimoDTO {
+  valorPago?: number;
+  parcelasPagas?: number;
   status?: 'ATIVO' | 'QUITADO' | 'CANCELADO';
-  dataUltimaParcela?: string;
   observacoes?: string;
 }
